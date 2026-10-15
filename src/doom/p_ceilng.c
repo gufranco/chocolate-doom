@@ -81,6 +81,7 @@ void T_MoveCeiling (ceiling_t* ceiling)
 		
 	      case silentCrushAndRaise:
 		S_StartSound(&ceiling->sector->soundorg, sfx_pstop);
+		// fall through
 	      case fastCrushAndRaise:
 	      case crushAndRaise:
 		ceiling->direction = -1;
@@ -116,8 +117,10 @@ void T_MoveCeiling (ceiling_t* ceiling)
 	    {
 	      case silentCrushAndRaise:
 		S_StartSound(&ceiling->sector->soundorg, sfx_pstop);
+		// fall through
 	      case crushAndRaise:
 		ceiling->speed = CEILSPEED;
+		// fall through
 	      case fastCrushAndRaise:
 		ceiling->direction = 1;
 		break;
@@ -210,6 +213,7 @@ EV_DoCeiling
 	  case crushAndRaise:
 	    ceiling->crush = true;
 	    ceiling->topheight = sec->ceilingheight;
+	    // fall through
 	  case lowerAndCrush:
 	  case lowerToFloor:
 	    ceiling->bottomheight = sec->floorheight;
