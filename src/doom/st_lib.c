@@ -93,6 +93,7 @@ STlib_drawNum
     int		neg;
 
     n->oldnum = *n->num;
+    (void) refresh;
 
     neg = num < 0;
 

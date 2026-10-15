@@ -563,6 +563,7 @@ char HU_dequeueChatChar(void)
 
 static void StartChatInput(int dest)
 {
+    (void) dest;
     chat_on = true;
     HUlib_resetIText(&w_chat);
     HU_queueChatChar(HU_BROADCAST);

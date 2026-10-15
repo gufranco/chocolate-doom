@@ -579,6 +579,7 @@ void M_LoadSelect(int choice)
 //
 void M_LoadGame (int choice)
 {
+    (void) choice;
     if (netgame)
     {
 	M_StartMessage(DEH_String(LOADNET),NULL,false);
@@ -630,6 +631,7 @@ void M_DoSave(int slot)
 //
 static void SetDefaultSaveName(int slot)
 {
+    (void) slot;
     // map from IWAD or PWAD?
     if (W_IsIWADLump(maplumpinfo) && strcmp(savegamedir, ""))
     {
@@ -689,6 +691,7 @@ void M_SaveSelect(int choice)
 //
 void M_SaveGame (int choice)
 {
+    (void) choice;
     if (!usergame)
     {
 	M_StartMessage(DEH_String(SAVEDEAD),NULL,false);
@@ -828,6 +831,7 @@ void M_DrawSound(void)
 
 void M_Sound(int choice)
 {
+    (void) choice;
     M_SetupNextMenu(&SoundDef);
 }
 
@@ -891,6 +895,7 @@ void M_DrawNewGame(void)
 
 void M_NewGame(int choice)
 {
+    (void) choice;
     if (netgame && !demoplayback)
     {
 	M_StartMessage(DEH_String(NEWGAME),NULL,false);
@@ -981,6 +986,7 @@ void M_DrawOptions(void)
 
 void M_Options(int choice)
 {
+    (void) choice;
     M_SetupNextMenu(&OptionsDef);
 }
 
@@ -992,7 +998,7 @@ void M_Options(int choice)
 void M_ChangeMessages(int choice)
 {
     // warning: unused parameter `int choice'
-    choice = 0;
+    (void) choice;
     showMessages = 1 - showMessages;
 	
     if (!showMessages)
@@ -1019,7 +1025,7 @@ void M_EndGameResponse(int key)
 
 void M_EndGame(int choice)
 {
-    choice = 0;
+    (void) choice;
     if (!usergame)
     {
 	S_StartSound(NULL,sfx_oof);
@@ -1043,19 +1049,19 @@ void M_EndGame(int choice)
 //
 void M_ReadThis(int choice)
 {
-    choice = 0;
+    (void) choice;
     M_SetupNextMenu(&ReadDef1);
 }
 
 void M_ReadThis2(int choice)
 {
-    choice = 0;
+    (void) choice;
     M_SetupNextMenu(&ReadDef2);
 }
 
 void M_FinishReadThis(int choice)
 {
-    choice = 0;
+    (void) choice;
     M_SetupNextMenu(&MainDef);
 }
 
@@ -1130,6 +1136,7 @@ static const char *M_SelectEndMessage(void)
 
 void M_QuitDOOM(int choice)
 {
+    (void) choice;
     DEH_snprintf(endstring, sizeof(endstring), "%s\n\n" DOSY,
                  DEH_String(M_SelectEndMessage()));
 
@@ -1159,7 +1166,7 @@ void M_ChangeSensitivity(int choice)
 
 void M_ChangeDetail(int choice)
 {
-    choice = 0;
+    (void) choice;
     detailLevel = 1 - detailLevel;
 
     R_SetViewSize (screenblocks, detailLevel);

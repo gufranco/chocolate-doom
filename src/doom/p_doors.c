@@ -545,6 +545,7 @@ P_SpawnDoorRaiseIn5Mins
   int		secnum )
 {
     vldoor_t*	door;
+    (void) secnum;
 	
     door = Z_Malloc ( sizeof(*door), PU_LEVSPEC, 0);
     

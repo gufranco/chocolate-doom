@@ -1792,6 +1792,7 @@ A_OpenShotgun2
 ( player_t*	player,
   pspdef_t*	psp )
 {
+    (void) psp;
     S_StartSound (player->mo, sfx_dbopn);
 }
 
@@ -1800,6 +1801,7 @@ A_LoadShotgun2
 ( player_t*	player,
   pspdef_t*	psp )
 {
+    (void) psp;
     S_StartSound (player->mo, sfx_dbload);
 }
 
@@ -1827,6 +1829,7 @@ void A_BrainAwake (mobj_t* mo)
 {
     thinker_t*	thinker;
     mobj_t*	m;
+    (void) mo;
 	
     // find all the target spots
     numbraintargets = 0;
@@ -1854,6 +1857,7 @@ void A_BrainAwake (mobj_t* mo)
 
 void A_BrainPain (mobj_t*	mo)
 {
+    (void) mo;
     S_StartSound (NULL,sfx_bospn);
 }
 
@@ -1907,6 +1911,7 @@ void A_BrainExplode (mobj_t* mo)
 
 void A_BrainDie (mobj_t*	mo)
 {
+    (void) mo;
     G_ExitLevel ();
 }
 

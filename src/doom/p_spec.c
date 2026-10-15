@@ -1191,6 +1191,8 @@ static void DonutOverrun(fixed_t *s3_floorheight, short *s3_floorpic,
     static int first = 1;
     static int tmp_s3_floorheight;
     static int tmp_s3_floorpic;
+    (void) line;
+    (void) pillar_sector;
 
     if (first)
     {
