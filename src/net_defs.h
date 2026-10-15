@@ -34,7 +34,9 @@
 // This is the maximum supported by the networking code; individual games
 // have their own values for MAXPLAYERS that can be smaller.
 
+#ifndef NET_MAXPLAYERS
 #define NET_MAXPLAYERS 8
+#endif
 
 // Maximum length of a player's name.
 
@@ -42,7 +44,9 @@
 
 // Networking and tick handling related.
 
+#ifndef BACKUPTICS
 #define BACKUPTICS 128
+#endif
 
 typedef struct _net_module_s net_module_t;
 typedef struct _net_packet_s net_packet_t;

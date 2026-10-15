@@ -60,7 +60,9 @@ extern  boolean setsizeneeded;
 
 // Lighting constants.
 // Now why not 32 levels here?
+#ifndef LIGHTLEVELS
 #define LIGHTLEVELS	        16
+#endif
 #define LIGHTSEGSHIFT	         4
 
 #define MAXLIGHTSCALE		48

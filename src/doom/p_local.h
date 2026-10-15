@@ -93,7 +93,9 @@ void	P_PlayerThink (player_t* player);
 #define ONCEILINGZ		INT_MAX
 
 // Time interval for item respawning.
+#ifndef ITEMQUESIZE
 #define ITEMQUESIZE		128
+#endif
 
 extern mapthing_t	itemrespawnque[ITEMQUESIZE];
 extern int		itemrespawntime[ITEMQUESIZE];
@@ -152,7 +154,9 @@ typedef struct
 // Extended MAXINTERCEPTS, to allow for intercepts overrun emulation.
 
 #define MAXINTERCEPTS_ORIGINAL 128
+#ifndef MAXINTERCEPTS
 #define MAXINTERCEPTS          (MAXINTERCEPTS_ORIGINAL + 61)
+#endif
 
 extern intercept_t	intercepts[MAXINTERCEPTS];
 extern intercept_t*	intercept_p;

@@ -24,8 +24,12 @@
 
 // Screen width and height.
 
+#ifndef SCREENWIDTH
 #define SCREENWIDTH  320
+#endif
+#ifndef SCREENHEIGHT
 #define SCREENHEIGHT 200
+#endif
 
 // Screen height used when aspect_ratio_correct=true.
 
