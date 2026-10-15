@@ -715,12 +715,12 @@ static char *GetGameName(const char *gamename)
             DEH_snprintf(deh_gamename, gamename_size, banners[i],
                          version / 100, version % 100);
 
-            while (deh_gamename[0] != '\0' && isspace(deh_gamename[0]))
+            while (deh_gamename[0] != '\0' && isspace((unsigned char) deh_gamename[0]))
             {
                 memmove(deh_gamename, deh_gamename + 1, gamename_size - 1);
             }
 
-            while (deh_gamename[0] != '\0' && isspace(deh_gamename[strlen(deh_gamename)-1]))
+            while (deh_gamename[0] != '\0' && isspace((unsigned char) deh_gamename[strlen(deh_gamename)-1]))
             {
                 deh_gamename[strlen(deh_gamename) - 1] = '\0';
             }
