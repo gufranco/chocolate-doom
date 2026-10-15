@@ -65,9 +65,13 @@ extern  boolean setsizeneeded;
 #endif
 #define LIGHTSEGSHIFT	         4
 
+#ifndef MAXLIGHTSCALE
 #define MAXLIGHTSCALE		48
+#endif
 #define LIGHTSCALESHIFT		12
+#ifndef MAXLIGHTZ
 #define MAXLIGHTZ	       128
+#endif
 #define LIGHTZSHIFT		20
 
 extern lighttable_t*	scalelight[LIGHTLEVELS][MAXLIGHTSCALE];

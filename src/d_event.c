@@ -22,7 +22,9 @@
 #include <stdlib.h>
 #include "d_event.h"
 
+#ifndef MAXEVENTS
 #define MAXEVENTS 64
+#endif
 
 static event_t events[MAXEVENTS];
 static int eventhead;
