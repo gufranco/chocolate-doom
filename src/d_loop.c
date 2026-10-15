@@ -662,7 +662,7 @@ static void SinglePlayerClear(ticcmd_set_t *set)
 
     for (i = 0; i < NET_MAXPLAYERS; ++i)
     {
-        if (i != localplayer)
+        if (i != (unsigned int) localplayer)
         {
             set->ingame[i] = false;
         }

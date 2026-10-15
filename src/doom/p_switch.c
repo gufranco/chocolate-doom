@@ -119,7 +119,7 @@ void P_InitSwitchList(void)
 
     slindex = 0;
 
-    for (i = 0; i < arrlen(alphSwitchList); i++)
+    for (i = 0; i < (int) arrlen(alphSwitchList); i++)
     {
 	if (alphSwitchList[i].episode <= episode)
 	{

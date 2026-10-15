@@ -745,7 +745,7 @@ static void SetMissionForPackName(const char *pack_name)
         { "plutonia", pack_plut },
     };
 
-    for (i = 0; i < arrlen(packs); ++i)
+    for (i = 0; i < (int) arrlen(packs); ++i)
     {
         if (!strcasecmp(pack_name, packs[i].name))
         {
@@ -756,7 +756,7 @@ static void SetMissionForPackName(const char *pack_name)
 
     printf("Valid mission packs are:\n");
 
-    for (i = 0; i < arrlen(packs); ++i)
+    for (i = 0; i < (int) arrlen(packs); ++i)
     {
         printf("\t%s\n", packs[i].name);
     }
@@ -1709,7 +1709,7 @@ void D_DoomMain (void)
             numiwadlumps--;
         }
 
-        for (i = numiwadlumps; i < numlumps; ++i)
+        for (i = numiwadlumps; (unsigned int) i < numlumps; ++i)
         {
             if (!strncmp(lumpinfo[i]->name, "DEHACKED", 8))
             {

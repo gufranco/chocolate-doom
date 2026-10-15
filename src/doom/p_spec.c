@@ -1381,7 +1381,7 @@ static unsigned int NumScrollers()
 {
     unsigned int i, scrollers = 0;
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < (unsigned int) numlines; i++)
     {
         if (48 == lines[i].special)
         {

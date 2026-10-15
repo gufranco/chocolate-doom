@@ -297,7 +297,7 @@ static int G_NextWeapon(int direction)
         weapon = players[consoleplayer].pendingweapon;
     }
 
-    for (i=0; i<arrlen(weapon_order_table); ++i)
+    for (i=0; i<(int) arrlen(weapon_order_table); ++i)
     {
         if (weapon_order_table[i].weapon == weapon)
         {
@@ -307,7 +307,7 @@ static int G_NextWeapon(int direction)
 
     // The current weapon must be present in weapon_order_table
     // otherwise something has gone terribly wrong
-    if (i >= arrlen(weapon_order_table)) {
+    if (i >= (int) arrlen(weapon_order_table)) {
         I_Error("Internal error: weapon %d not present in weapon_order_table", weapon);
     }
 
@@ -510,7 +510,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     {
         // Check weapon keys.
 
-        for (i=0; i<arrlen(weapon_keys); ++i)
+        for (i=0; i<(int) arrlen(weapon_keys); ++i)
         {
             int key = *weapon_keys[i];
 
