@@ -1792,11 +1792,16 @@ G_DeferedInitNew
 
 void G_DoNewGame (void) 
 {
+    int i;
+
     demoplayback = false; 
     netdemo = false;
     netgame = false;
     deathmatch = false;
-    playeringame[1] = playeringame[2] = playeringame[3] = 0;
+    for (i = 1; i < MAXPLAYERS; ++i)
+    {
+        playeringame[i] = false;
+    }
     respawnparm = false;
     fastparm = false;
     nomonsters = false;
@@ -2171,8 +2176,8 @@ void G_BeginRecording (void)
         *demo_p++ = consoleplayer;
     }
 	 
-    for (i=0 ; i<MAXPLAYERS ; i++) 
-	*demo_p++ = playeringame[i]; 		 
+    for (i=0 ; i<FILEFORMAT_MAXPLAYERS ; i++) 
+	*demo_p++ = i < MAXPLAYERS ? playeringame[i] : 0;
 } 
  
 
@@ -2295,10 +2300,17 @@ void G_DoPlayDemo (void)
     }
     
         
-    for (i=0 ; i<MAXPLAYERS ; i++) 
-	playeringame[i] = *demo_p++; 
+    for (i=0 ; i<FILEFORMAT_MAXPLAYERS ; i++) 
+    {
+        byte ingame = *demo_p++;
 
-    if (playeringame[1] || M_CheckParm("-solo-net") > 0
+        if (i < MAXPLAYERS)
+        {
+            playeringame[i] = ingame;
+        }
+    }
+
+    if ((MAXPLAYERS > 1 && playeringame[1]) || M_CheckParm("-solo-net") > 0
                         || M_CheckParm("-netdemo") > 0)
     {
 	netgame = true;
@@ -2350,6 +2362,7 @@ void G_TimeDemo (char* name)
 boolean G_CheckDemoStatus (void) 
 { 
     int             endtime; 
+    int             i;
 	 
     if (timingdemo) 
     { 
@@ -2375,7 +2388,10 @@ boolean G_CheckDemoStatus (void)
 	netdemo = false;
 	netgame = false;
 	deathmatch = false;
-	playeringame[1] = playeringame[2] = playeringame[3] = 0;
+	for (i = 1; i < MAXPLAYERS; ++i)
+	{
+	    playeringame[i] = false;
+	}
 	respawnparm = false;
 	fastparm = false;
 	nomonsters = false;

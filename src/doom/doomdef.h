@@ -46,6 +46,14 @@
 #define MAXPLAYERS 4
 #endif
 
+#define VANILLA_MAXPLAYERS 4
+
+#if MAXPLAYERS > VANILLA_MAXPLAYERS
+#define FILEFORMAT_MAXPLAYERS MAXPLAYERS
+#else
+#define FILEFORMAT_MAXPLAYERS VANILLA_MAXPLAYERS
+#endif
+
 // The current state of the game: whether we are
 // playing, gazing at the intermission screen,
 // the game final animation, or a demo. 

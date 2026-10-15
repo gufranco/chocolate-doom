@@ -685,9 +685,14 @@ static void saveg_read_player_t(player_t *str)
     str->backpack = saveg_read32();
 
     // int frags[MAXPLAYERS];
-    for (i=0; i<MAXPLAYERS; ++i)
+    for (i=0; i<FILEFORMAT_MAXPLAYERS; ++i)
     {
-        str->frags[i] = saveg_read32();
+        int frags = saveg_read32();
+
+        if (i < MAXPLAYERS)
+        {
+            str->frags[i] = frags;
+        }
     }
 
     // weapontype_t readyweapon;
@@ -816,9 +821,9 @@ static void saveg_write_player_t(player_t *str)
     saveg_write32(str->backpack);
 
     // int frags[MAXPLAYERS];
-    for (i=0; i<MAXPLAYERS; ++i)
+    for (i=0; i<FILEFORMAT_MAXPLAYERS; ++i)
     {
-        saveg_write32(str->frags[i]);
+        saveg_write32(i < MAXPLAYERS ? str->frags[i] : 0);
     }
 
     // weapontype_t readyweapon;
@@ -1361,8 +1366,8 @@ void P_WriteSaveGameHeader(char *description)
     saveg_write8(gameepisode);
     saveg_write8(gamemap);
 
-    for (i=0 ; i<MAXPLAYERS ; i++) 
-        saveg_write8(playeringame[i]);
+    for (i=0 ; i<FILEFORMAT_MAXPLAYERS ; i++) 
+        saveg_write8(i < MAXPLAYERS ? playeringame[i] : 0);
 
     saveg_write8((leveltime >> 16) & 0xff);
     saveg_write8((leveltime >> 8) & 0xff);
@@ -1397,8 +1402,15 @@ boolean P_ReadSaveGameHeader(void)
     gameepisode = saveg_read8();
     gamemap = saveg_read8();
 
-    for (i=0 ; i<MAXPLAYERS ; i++) 
-	playeringame[i] = saveg_read8();
+    for (i=0 ; i<FILEFORMAT_MAXPLAYERS ; i++) 
+    {
+        byte ingame = saveg_read8();
+
+        if (i < MAXPLAYERS)
+        {
+            playeringame[i] = ingame;
+        }
+    }
 
     // get the times 
     a = saveg_read8();
