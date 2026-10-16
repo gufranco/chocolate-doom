@@ -581,8 +581,15 @@ int		iquehead;
 int		iquetail;
 
 
+#if defined(DNG_STREAM_THINGS)
+void DNG_StreamMobjRemoved(const mobj_t *mo);
+#endif
+
 void P_RemoveMobj (mobj_t* mobj)
 {
+#if defined(DNG_STREAM_THINGS)
+    DNG_StreamMobjRemoved(mobj);
+#endif
     if ((mobj->flags & MF_SPECIAL)
 	&& !(mobj->flags & MF_DROPPED)
 	&& (mobj->type != MT_INV)
@@ -750,6 +757,18 @@ void P_SpawnPlayer (mapthing_t* mthing)
 }
 
 
+#if defined(DNG_MOBJ_BUDGET)
+#ifndef DNG_MOBJ_HARD_RESERVE
+#define DNG_MOBJ_HARD_RESERVE 10240
+#endif
+#ifndef DNG_MOBJ_SOFT_RESERVE
+#define DNG_MOBJ_SOFT_RESERVE 12288
+#endif
+#ifndef DNG_RUNTIME_SPAWN_RESERVE
+#define DNG_RUNTIME_SPAWN_RESERVE 1024
+#endif
+#endif
+
 //
 // P_SpawnMapThing
 // The fields of the mapthing should
@@ -835,6 +854,29 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	return;
     }
     
+#if defined(DNG_SKIP_DECORATIONS)
+    if (!(mobjinfo[i].flags
+          & (MF_SOLID | MF_SHOOTABLE | MF_SPECIAL | MF_COUNTKILL)))
+    {
+        return;
+    }
+#endif
+
+#if defined(DNG_MOBJ_BUDGET)
+    {
+        const int dng_free = Z_FreeMemory();
+        if (dng_free < DNG_MOBJ_HARD_RESERVE)
+        {
+            return;
+        }
+        if (dng_free < DNG_MOBJ_SOFT_RESERVE
+            && !(mobjinfo[i].flags & (MF_COUNTKILL | MF_SPECIAL)))
+        {
+            return;
+        }
+    }
+#endif
+
     // spawn it
     x = mthing->x << FRACBITS;
     y = mthing->y << FRACBITS;
@@ -877,7 +919,12 @@ P_SpawnPuff
   fixed_t	z )
 {
     mobj_t*	th;
-	
+
+#if defined(DNG_MOBJ_BUDGET)
+    if (Z_FreeMemory() < DNG_RUNTIME_SPAWN_RESERVE)
+	return;
+#endif
+
     z += (P_SubRandom() << 10);
 
     th = P_SpawnMobj (x,y,z, MT_PUFF);
@@ -905,7 +952,12 @@ P_SpawnBlood
   int		damage )
 {
     mobj_t*	th;
-	
+
+#if defined(DNG_MOBJ_BUDGET)
+    if (Z_FreeMemory() < DNG_RUNTIME_SPAWN_RESERVE)
+	return;
+#endif
+
     z += (P_SubRandom() << 10);
     th = P_SpawnMobj (x,y,z, MT_BLOOD);
     th->momz = FRACUNIT*2;
