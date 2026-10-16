@@ -230,10 +230,10 @@ boolean PIT_CheckLine (line_t* ld)
 		
     if (!(tmthing->flags & MF_MISSILE) )
     {
-	if ( ld->flags & ML_BLOCKING )
+	if ( ld->mut->flags & ML_BLOCKING )
 	    return false;	// explicitly blocking everything
 
-	if ( !tmthing->player && ld->flags & ML_BLOCKMONSTERS )
+	if ( !tmthing->player && ld->mut->flags & ML_BLOCKMONSTERS )
 	    return false;	// block monsters only
     }
 
@@ -254,12 +254,13 @@ boolean PIT_CheckLine (line_t* ld)
 	tmdropoffz = lowfloor;
 		
     // if contacted a special line, add it to the list
-    if (ld->special)
+    if (ld->mut->special)
     {
-        spechit[numspechit] = ld;
-	numspechit++;
-
-        // fraggle: spechits overrun emulation code from prboom-plus
+        if (numspechit < MAXSPECIALCROSS)
+        {
+            spechit[numspechit] = ld;
+            numspechit++;
+        }
         if (numspechit > MAXSPECIALCROSS_ORIGINAL)
         {
             SpechitOverrun(ld);
@@ -534,7 +535,7 @@ P_TryMove
 	    oldside = P_PointOnLineSide (oldx, oldy, ld);
 	    if (side != oldside)
 	    {
-		if (ld->special)
+		if (ld->mut->special)
 		    P_CrossSpecialLine (ld-lines, oldside, thing);
 	    }
 	}
@@ -669,7 +670,7 @@ boolean PTR_SlideTraverse (intercept_t* in)
 		
     li = in->d.line;
     
-    if ( ! (li->flags & ML_TWOSIDED) )
+    if ( ! (li->mut->flags & ML_TWOSIDED) )
     {
 	if (P_PointOnLineSide (slidemo->x, slidemo->y, li))
 	{
@@ -849,7 +850,7 @@ PTR_AimTraverse (intercept_t* in)
     {
 	li = in->d.line;
 	
-	if ( !(li->flags & ML_TWOSIDED) )
+	if ( !(li->mut->flags & ML_TWOSIDED) )
 	    return false;		// stop
 	
 	// Crosses a two sided line.
@@ -941,10 +942,10 @@ boolean PTR_ShootTraverse (intercept_t* in)
     {
 	li = in->d.line;
 	
-	if (li->special)
+	if (li->mut->special)
 	    P_ShootSpecialLine (shootthing, li);
 
-	if ( !(li->flags & ML_TWOSIDED) )
+	if ( !(li->mut->flags & ML_TWOSIDED) )
 	    goto hitline;
 	
 	// crosses a two sided line
@@ -1139,7 +1140,7 @@ boolean	PTR_UseTraverse (intercept_t* in)
 {
     int		side;
 	
-    if (!in->d.line->special)
+    if (!in->d.line->mut->special)
     {
 	P_LineOpening (in->d.line);
 	if (openrange <= 0)
@@ -1387,59 +1388,6 @@ P_ChangeSector
 
 static void SpechitOverrun(line_t *ld)
 {
-    static unsigned int baseaddr = 0;
-    unsigned int addr;
-   
-    if (baseaddr == 0)
-    {
-        int p;
-
-        // This is the first time we have had an overrun.  Work out
-        // what base address we are going to use.
-        // Allow a spechit value to be specified on the command line.
-
-        //!
-        // @category compat
-        // @arg <n>
-        //
-        // Use the specified magic value when emulating spechit overruns.
-        //
-
-        p = M_CheckParmWithArgs("-spechit", 1);
-        
-        if (p > 0)
-        {
-            M_StrToInt(myargv[p+1], (int *) &baseaddr);
-        }
-        else
-        {
-            baseaddr = DEFAULT_SPECHIT_MAGIC;
-        }
-    }
-    
-    // Calculate address used in doom2.exe
-
-    addr = baseaddr + (ld - lines) * 0x3E;
-
-    switch(numspechit)
-    {
-        case 9: 
-        case 10:
-        case 11:
-        case 12:
-            tmbbox[numspechit-9] = addr;
-            break;
-        case 13: 
-            crushchange = addr; 
-            break;
-        case 14: 
-            nofit = addr; 
-            break;
-        default:
-            fprintf(stderr, "SpechitOverrun: Warning: unable to emulate"
-                            "an overrun where numspechit=%i\n",
-                            numspechit);
-            break;
-    }
+    (void)ld;
 }
 
