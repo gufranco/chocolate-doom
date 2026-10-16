@@ -266,7 +266,7 @@ typedef struct
 
     angle_t	angle;
 
-    side_t*	sidedef;
+    const side_t*	sidedef;
     line_t*	linedef;
 
     // Sector references.

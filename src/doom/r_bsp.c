@@ -38,7 +38,7 @@
 
 
 seg_t*		curline;
-side_t*		sidedef;
+const side_t*	sidedef;
 line_t*		linedef;
 sector_t*	frontsector;
 sector_t*	backsector;

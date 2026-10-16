@@ -75,7 +75,7 @@ getSector
   int		line,
   int		side );
 
-side_t*
+const side_t*
 getSide
 ( int		currentSector,
   int		line,

@@ -1496,7 +1496,7 @@ void P_ArchiveWorld (void)
     int			j;
     sector_t*		sec;
     line_t*		li;
-    side_t*		si;
+    const side_t*	si;
     
     // do sectors
     for (i=0, sec = sectors ; i<numsectors ; i++,sec++)
@@ -1522,7 +1522,7 @@ void P_ArchiveWorld (void)
 	    if (li->sidenum[j] == -1)
 		continue;
 	    
-	    si = &sides[li->sidenum[j]];
+	    si = SIDE_AT(li->sidenum[j]);
 
 	    saveg_write16(si->textureoffset >> FRACBITS);
 	    saveg_write16(si->rowoffset >> FRACBITS);
@@ -1574,7 +1574,7 @@ void P_UnArchiveWorld (void)
 	{
 	    if (li->sidenum[j] == -1)
 		continue;
-	    si = &sides[li->sidenum[j]];
+	    si = SIDE_MUT(li->sidenum[j]);
 	    si->textureoffset = saveg_read16() << FRACBITS;
 	    si->rowoffset = saveg_read16() << FRACBITS;
 	    si->toptexture = saveg_read16();

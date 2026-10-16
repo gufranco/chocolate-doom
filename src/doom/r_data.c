@@ -837,9 +837,9 @@ void R_PrecacheLevel (void)
 	
     for (i=0 ; i<numsides ; i++)
     {
-	texturepresent[sides[i].toptexture] = 1;
-	texturepresent[sides[i].midtexture] = 1;
-	texturepresent[sides[i].bottomtexture] = 1;
+	texturepresent[SIDE_AT(i)->toptexture] = 1;
+	texturepresent[SIDE_AT(i)->midtexture] = 1;
+	texturepresent[SIDE_AT(i)->bottomtexture] = 1;
     }
 
     // Sky texture is always present.

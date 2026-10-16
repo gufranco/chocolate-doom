@@ -92,6 +92,10 @@ extern line_mut_t*	lines_mut;
 extern int		numsides;
 extern side_t*		sides;
 
+#define SIDE_AT(i)	((const side_t *) &sides[(i)])
+#define SIDE_MUT(i)	(&sides[(i)])
+#define SIDE_INDEX(sd)	((int) ((sd) - sides))
+
 
 //
 // POV data.

@@ -197,13 +197,13 @@ void P_InitPicAnims (void)
 //  given the number of the current sector,
 //  the line number, and the side (0/1) that you want.
 //
-side_t*
+const side_t*
 getSide
 ( int		currentSector,
   int		line,
   int		side )
 {
-    return &sides[ SECTOR_LINE(&sectors[currentSector], line)->sidenum[side] ];
+    return SIDE_AT(SECTOR_LINE(&sectors[currentSector], line)->sidenum[side]);
 }
 
 
@@ -219,7 +219,7 @@ getSector
   int		line,
   int		side )
 {
-    return SIDE_SECTOR(&sides[ SECTOR_LINE(&sectors[currentSector], line)->sidenum[side] ]);
+    return SIDE_SECTOR(SIDE_AT(SECTOR_LINE(&sectors[currentSector], line)->sidenum[side]));
 }
 
 
@@ -1139,7 +1139,7 @@ void P_UpdateSpecials (void)
 	  case 48:
 	    // EFFECT FIRSTCOL SCROLL +
 #if !defined(DNG_EMBED_GEOMETRY)
-	    sides[line->sidenum[0]].textureoffset += FRACUNIT;
+	    SIDE_MUT(line->sidenum[0])->textureoffset += FRACUNIT;
 #endif
 	    break;
 	}
@@ -1156,17 +1156,17 @@ void P_UpdateSpecials (void)
 		switch(buttonlist[i].where)
 		{
 		  case top:
-		    sides[buttonlist[i].line->sidenum[0]].toptexture =
+		    SIDE_MUT(buttonlist[i].line->sidenum[0])->toptexture =
 			buttonlist[i].btexture;
 		    break;
 		    
 		  case middle:
-		    sides[buttonlist[i].line->sidenum[0]].midtexture =
+		    SIDE_MUT(buttonlist[i].line->sidenum[0])->midtexture =
 			buttonlist[i].btexture;
 		    break;
 		    
 		  case bottom:
-		    sides[buttonlist[i].line->sidenum[0]].bottomtexture =
+		    SIDE_MUT(buttonlist[i].line->sidenum[0])->bottomtexture =
 			buttonlist[i].btexture;
 		    break;
 		}

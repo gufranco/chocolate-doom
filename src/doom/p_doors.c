@@ -393,7 +393,7 @@ EV_VerticalDoor
         I_Error("EV_VerticalDoor: DR special type on 1-sided linedef");
     }
 
-    sec = SIDE_SECTOR(&sides[ line->sidenum[side^1] ]);
+    sec = SIDE_SECTOR(SIDE_AT(line->sidenum[side^1]));
 
     if (sec->specialdata)
     {
@@ -630,7 +630,7 @@ int P_FindSlidingDoorType(line_t*	line)
 	
     for (i = 0;i < MAXSLIDEDOORS;i++)
     {
-	val = sides[line->sidenum[0]].midtexture;
+	val = SIDE_AT(line->sidenum[0])->midtexture;
 	if (val == slideFrames[i].frontFrames[0])
 	    return i;
     }
@@ -648,8 +648,8 @@ void T_SlidingDoor (slidedoor_t*	door)
 	    if (++door->frame == SNUMFRAMES)
 	    {
 		// IF DOOR IS DONE OPENING...
-		sides[door->line->sidenum[0]].midtexture = 0;
-		sides[door->line->sidenum[1]].midtexture = 0;
+		SIDE_MUT(door->line->sidenum[0])->midtexture = 0;
+		SIDE_MUT(door->line->sidenum[1])->midtexture = 0;
 		door->line->flags &= ML_BLOCKING^0xff;
 					
 		if (door->type == sdt_openOnly)
@@ -667,10 +667,10 @@ void T_SlidingDoor (slidedoor_t*	door)
 		// IF DOOR NEEDS TO ANIMATE TO NEXT FRAME...
 		door->timer = SWAITTICS;
 					
-		sides[door->line->sidenum[0]].midtexture =
+		SIDE_MUT(door->line->sidenum[0])->midtexture =
 		    slideFrames[door->whichDoorIndex].
 		    frontFrames[door->frame];
-		sides[door->line->sidenum[1]].midtexture =
+		SIDE_MUT(door->line->sidenum[1])->midtexture =
 		    slideFrames[door->whichDoorIndex].
 		    backFrames[door->frame];
 	    }
@@ -711,10 +711,10 @@ void T_SlidingDoor (slidedoor_t*	door)
 		// IF DOOR NEEDS TO ANIMATE TO NEXT FRAME...
 		door->timer = SWAITTICS;
 					
-		sides[door->line->sidenum[0]].midtexture =
+		SIDE_MUT(door->line->sidenum[0])->midtexture =
 		    slideFrames[door->whichDoorIndex].
 		    frontFrames[door->frame];
-		sides[door->line->sidenum[1]].midtexture =
+		SIDE_MUT(door->line->sidenum[1])->midtexture =
 		    slideFrames[door->whichDoorIndex].
 		    backFrames[door->frame];
 	    }

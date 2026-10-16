@@ -269,8 +269,8 @@ void P_LoadSegs (int lump)
                     linedef, i, (unsigned)ldef->sidenum[side]);
         }
 
-	li->sidedef = &sides[ldef->sidenum[side]];
-	li->frontsector = SIDE_SECTOR(&sides[ldef->sidenum[side]]);
+	li->sidedef = SIDE_AT(ldef->sidenum[side]);
+	li->frontsector = SIDE_SECTOR(SIDE_AT(ldef->sidenum[side]));
 
         if (ldef->mut->flags & ML_TWOSIDED)
         {
@@ -288,7 +288,7 @@ void P_LoadSegs (int lump)
             }
             else
             {
-                li->backsector = SIDE_SECTOR(&sides[sidenum]);
+                li->backsector = SIDE_SECTOR(SIDE_AT(sidenum));
             }
         }
         else
@@ -591,12 +591,12 @@ void P_LoadLineDefs (int lump)
 	ld->sidenum[1] = SHORT(mld->sidenum[1]);
 
 	if (ld->sidenum[0] != -1)
-	    ld->frontsector = SIDE_SECTOR(&sides[ld->sidenum[0]]);
+	    ld->frontsector = SIDE_SECTOR(SIDE_AT(ld->sidenum[0]));
 	else
 	    ld->frontsector = 0;
 
 	if (ld->sidenum[1] != -1)
-	    ld->backsector = SIDE_SECTOR(&sides[ld->sidenum[1]]);
+	    ld->backsector = SIDE_SECTOR(SIDE_AT(ld->sidenum[1]));
 	else
 	    ld->backsector = 0;
     }
