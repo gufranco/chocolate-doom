@@ -20,6 +20,7 @@
 
 
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,6 +62,17 @@ unsigned int numlumps = 0;
 
 // Hash table for fast lookups
 static lumpindex_t *lumphash;
+
+extern const uint32_t doomng_embedded_numlumps __attribute__((weak));
+extern lumpinfo_t *const doomng_embedded_lumpinfo_ptrs[] __attribute__((weak));
+extern const lumpindex_t doomng_embedded_lumphash[] __attribute__((weak));
+extern wad_file_t doomng_embedded_wad_file_singleton __attribute__((weak));
+
+static boolean DoomNG_HasEmbeddedDirectory(void)
+{
+    return (&doomng_embedded_numlumps != NULL)
+        && (doomng_embedded_numlumps > 0u);
+}
 
 // Variables for the reload hack: filename of the PWAD to reload, and the
 // lumps from WADs before the reload file, so we can resent numlumps and
@@ -111,6 +123,23 @@ wad_file_t *W_AddFile (const char *filename)
     filelump_t *filerover;
     lumpinfo_t *filelumps;
     int numfilelumps;
+
+    if (DoomNG_HasEmbeddedDirectory() && numlumps == 0)
+    {
+        extern const uint8_t  doomng_embedded_wad_bytes[]
+            __attribute__((weak));
+        extern const uint32_t doomng_embedded_wad_size
+            __attribute__((weak));
+        doomng_embedded_wad_file_singleton.file_class = &stdc_wad_file;
+        doomng_embedded_wad_file_singleton.mapped =
+            (byte *)(uintptr_t)doomng_embedded_wad_bytes;
+        doomng_embedded_wad_file_singleton.length =
+            doomng_embedded_wad_size;
+        doomng_embedded_wad_file_singleton.path = "embedded.wad";
+        numlumps = doomng_embedded_numlumps;
+        lumpinfo = (lumpinfo_t **)doomng_embedded_lumpinfo_ptrs;
+        return &doomng_embedded_wad_file_singleton;
+    }
 
     // If the filename begins with a ~, it indicates that we should use the
     // reload hack.
@@ -317,7 +346,7 @@ lumpindex_t W_GetNumForName(const char *name)
     {
         I_Error ("W_GetNumForName: %s not found!", name);
     }
- 
+
     return i;
 }
 
@@ -540,6 +569,13 @@ void W_Profile (void)
 void W_GenerateHashTable(void)
 {
     lumpindex_t i;
+
+    if (DoomNG_HasEmbeddedDirectory()
+        && lumpinfo == (lumpinfo_t **)doomng_embedded_lumpinfo_ptrs)
+    {
+        lumphash = (lumpindex_t *)(uintptr_t)doomng_embedded_lumphash;
+        return;
+    }
 
     // Free the old hash table, if there is one:
     if (lumphash != NULL)
