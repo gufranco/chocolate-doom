@@ -203,7 +203,7 @@ getSide
   int		line,
   int		side )
 {
-    return &sides[ (sectors[currentSector].lines[line])->sidenum[side] ];
+    return &sides[ SECTOR_LINE(&sectors[currentSector], line)->sidenum[side] ];
 }
 
 
@@ -219,7 +219,7 @@ getSector
   int		line,
   int		side )
 {
-    return sides[ (sectors[currentSector].lines[line])->sidenum[side] ].sector;
+    return SIDE_SECTOR(&sides[ SECTOR_LINE(&sectors[currentSector], line)->sidenum[side] ]);
 }
 
 
@@ -233,7 +233,7 @@ twoSided
 ( int	sector,
   int	line )
 {
-    return (sectors[sector].lines[line])->flags & ML_TWOSIDED;
+    return SECTOR_LINE(&sectors[sector], line)->mut->flags & ML_TWOSIDED;
 }
 
 
@@ -249,7 +249,7 @@ getNextSector
 ( line_t*	line,
   sector_t*	sec )
 {
-    if (!(line->flags & ML_TWOSIDED))
+    if (!(line->mut->flags & ML_TWOSIDED))
 	return NULL;
 		
     if (line->frontsector == sec)
@@ -273,7 +273,7 @@ fixed_t	P_FindLowestFloorSurrounding(sector_t* sec)
 	
     for (i=0 ;i < sec->linecount ; i++)
     {
-	check = sec->lines[i];
+	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
 
 	if (!other)
@@ -300,7 +300,7 @@ fixed_t	P_FindHighestFloorSurrounding(sector_t *sec)
 	
     for (i=0 ;i < sec->linecount ; i++)
     {
-	check = sec->lines[i];
+	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
 	
 	if (!other)
@@ -339,7 +339,7 @@ P_FindNextHighestFloor
 
     for (i=0, h=0; i < sec->linecount; i++)
     {
-        check = sec->lines[i];
+        check = SECTOR_LINE(sec, i);
         other = getNextSector(check,sec);
 
         if (!other)
@@ -396,7 +396,7 @@ P_FindLowestCeilingSurrounding(sector_t* sec)
 	
     for (i=0 ;i < sec->linecount ; i++)
     {
-	check = sec->lines[i];
+	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
 
 	if (!other)
@@ -421,7 +421,7 @@ fixed_t	P_FindHighestCeilingSurrounding(sector_t* sec)
 	
     for (i=0 ;i < sec->linecount ; i++)
     {
-	check = sec->lines[i];
+	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
 
 	if (!other)
@@ -471,7 +471,7 @@ P_FindMinSurroundingLight
     min = max;
     for (i=0 ; i < sector->linecount ; i++)
     {
-	line = sector->lines[i];
+	line = SECTOR_LINE(sector, i);
 	check = getNextSector(line,sector);
 
 	if (!check)
@@ -509,7 +509,7 @@ P_CrossSpecialLine
     
     if (gameversion <= exe_doom_1_2)
     {
-        if (line->special > 98 && line->special != 104)
+        if (line->mut->special > 98 && line->mut->special != 104)
         {
             return;
         }
@@ -538,7 +538,7 @@ P_CrossSpecialLine
     if (!thing->player)
     {
 	ok = 0;
-	switch(line->special)
+	switch(line->mut->special)
 	{
 	  case 39:	// TELEPORT TRIGGER
 	  case 97:	// TELEPORT RETRIGGER
@@ -556,142 +556,142 @@ P_CrossSpecialLine
 
     
     // Note: could use some const's here.
-    switch (line->special)
+    switch (line->mut->special)
     {
 	// TRIGGERS.
 	// All from here to RETRIGGERS.
       case 2:
 	// Open Door
 	EV_DoDoor(line,vld_open);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 
       case 3:
 	// Close Door
 	EV_DoDoor(line,vld_close);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 
       case 4:
 	// Raise Door
 	EV_DoDoor(line,vld_normal);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 5:
 	// Raise Floor
 	EV_DoFloor(line,raiseFloor);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 6:
 	// Fast Ceiling Crush & Raise
 	EV_DoCeiling(line,fastCrushAndRaise);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 8:
 	// Build Stairs
 	EV_BuildStairs(line,build8);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 10:
 	// PlatDownWaitUp
 	EV_DoPlat(line,downWaitUpStay,0);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 12:
 	// Light Turn On - brightest near
 	EV_LightTurnOn(line,0);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 13:
 	// Light Turn On 255
 	EV_LightTurnOn(line,255);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 16:
 	// Close Door 30
 	EV_DoDoor(line,vld_close30ThenOpen);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 17:
 	// Start Light Strobing
 	EV_StartLightStrobing(line);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 19:
 	// Lower Floor
 	EV_DoFloor(line,lowerFloor);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 22:
 	// Raise floor to nearest height and change texture
 	EV_DoPlat(line,raiseToNearestAndChange,0);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 25:
 	// Ceiling Crush and Raise
 	EV_DoCeiling(line,crushAndRaise);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 30:
 	// Raise floor to shortest texture height
 	//  on either side of lines.
 	EV_DoFloor(line,raiseToTexture);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 35:
 	// Lights Very Dark
 	EV_LightTurnOn(line,35);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 36:
 	// Lower Floor (TURBO)
 	EV_DoFloor(line,turboLower);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 37:
 	// LowerAndChange
 	EV_DoFloor(line,lowerAndChange);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 38:
 	// Lower Floor To Lowest
 	EV_DoFloor( line, lowerFloorToLowest );
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 39:
 	// TELEPORT!
 	EV_Teleport( line, side, thing );
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 
       case 40:
 	// RaiseCeilingLowerFloor
 	EV_DoCeiling( line, raiseToHighest );
 	EV_DoFloor( line, lowerFloorToLowest );
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 44:
 	// Ceiling Crush
 	EV_DoCeiling( line, lowerAndCrush );
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 52:
@@ -702,79 +702,79 @@ P_CrossSpecialLine
       case 53:
 	// Perpetual Platform Raise
 	EV_DoPlat(line,perpetualRaise,0);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 54:
 	// Platform Stop
 	EV_StopPlat(line);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 
       case 56:
 	// Raise Floor Crush
 	EV_DoFloor(line,raiseFloorCrush);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 
       case 57:
 	// Ceiling Crush Stop
 	EV_CeilingCrushStop(line);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 58:
 	// Raise Floor 24
 	EV_DoFloor(line,raiseFloor24);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 
       case 59:
 	// Raise Floor 24 And Change
 	EV_DoFloor(line,raiseFloor24AndChange);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 104:
 	// Turn lights off in sector(tag)
 	EV_TurnTagLightsOff(line);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 108:
 	// Blazing Door Raise (faster than TURBO!)
 	EV_DoDoor (line,vld_blazeRaise);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 109:
 	// Blazing Door Open (faster than TURBO!)
 	EV_DoDoor (line,vld_blazeOpen);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 100:
 	// Build Stairs Turbo 16
 	EV_BuildStairs(line,turbo16);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 110:
 	// Blazing Door Close (faster than TURBO!)
 	EV_DoDoor (line,vld_blazeClose);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 
       case 119:
 	// Raise floor to nearest surr. floor
 	EV_DoFloor(line,raiseFloorToNearest);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 121:
 	// Blazing PlatDownWaitUpStay
 	EV_DoPlat(line,blazeDWUS,0);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 124:
@@ -787,20 +787,20 @@ P_CrossSpecialLine
 	if (!thing->player)
 	{
 	    EV_Teleport( line, side, thing );
-	    line->special = 0;
+	    line->mut->special = 0;
 	}
 	break;
 	
       case 130:
 	// Raise Floor Turbo
 	EV_DoFloor(line,raiseFloorTurbo);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 141:
 	// Silent Ceiling Crush & Raise
 	EV_DoCeiling(line,silentCrushAndRaise);
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
 	// RETRIGGERS.  All from here till end.
@@ -986,7 +986,7 @@ P_ShootSpecialLine
     if (!thing->player)
     {
 	ok = 0;
-	switch(line->special)
+	switch(line->mut->special)
 	{
 	  case 46:
 	    // OPEN DOOR IMPACT
@@ -997,7 +997,7 @@ P_ShootSpecialLine
 	    return;
     }
 
-    switch(line->special)
+    switch(line->mut->special)
     {
       case 24:
 	// RAISE FLOOR
@@ -1134,11 +1134,13 @@ void P_UpdateSpecials (void)
     for (i = 0; i < numlinespecials; i++)
     {
 	line = linespeciallist[i];
-	switch(line->special)
+	switch(line->mut->special)
 	{
 	  case 48:
 	    // EFFECT FIRSTCOL SCROLL +
+#if !defined(DNG_EMBED_GEOMETRY)
 	    sides[line->sidenum[0]].textureoffset += FRACUNIT;
+#endif
 	    break;
 	}
     }
@@ -1287,7 +1289,7 @@ int EV_DoDonut(line_t*	line)
 	    continue;
 
 	rtn = 1;
-	s2 = getNextSector(s1->lines[0],s1);
+	s2 = getNextSector(SECTOR_LINE(s1, 0),s1);
 
         // Vanilla Doom does not check if the linedef is one sided.  The
         // game does not crash, but reads invalid memory and causes the
@@ -1308,7 +1310,7 @@ int EV_DoDonut(line_t*	line)
 
 	for (i = 0; i < s2->linecount; i++)
 	{
-	    s3 = s2->lines[i]->backsector;
+	    s3 = SECTOR_LINE(s2, i)->backsector;
 
 	    if (s3 == s1)
 		continue;
@@ -1383,7 +1385,7 @@ static unsigned int NumScrollers()
 
     for (i = 0; i < (unsigned int) numlines; i++)
     {
-        if (48 == lines[i].special)
+        if (48 == lines[i].mut->special)
         {
             scrollers++;
         }
@@ -1483,7 +1485,7 @@ void P_SpawnSpecials (void)
     numlinespecials = 0;
     for (i = 0;i < numlines; i++)
     {
-	switch(lines[i].special)
+	switch(lines[i].mut->special)
 	{
 	  case 48:
             if (numlinespecials >= MAXLINEANIMS)
