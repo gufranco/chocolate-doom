@@ -227,7 +227,7 @@ typedef struct
     bwhere_e	where;
     int		btexture;
     int		btimer;
-    degenmobj_t *soundorg;
+    const degenmobj_t *soundorg;
 
 } button_t;
 

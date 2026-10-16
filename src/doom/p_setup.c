@@ -90,7 +90,9 @@ static boolean DoomNG_HasEmbeddedE1M1Nodes(void)
 int		numlines;
 line_t*		lines;
 line_mut_t*	lines_mut;
-sector_static_t*	sector_statics;
+#if !defined(DNG_EMBED_GEOMETRY)
+static sector_static_t*	sector_statics;
+#endif
 
 int		numsides;
 side_t*		sides;
@@ -108,10 +110,11 @@ extern const seg_t    doomng_embedded_e1m1_segs[] __attribute__((weak));
 extern const int16_t  doomng_embedded_e1m1_blockmap[] __attribute__((weak));
 extern const uint32_t   doomng_embedded_e1m1_numsubsectors __attribute__((weak));
 extern const subsector_t doomng_embedded_e1m1_subsectors[] __attribute__((weak));
+extern const sector_static_t doomng_embedded_e1m1_sector_statics[] __attribute__((weak));
+extern const uint32_t doomng_embedded_e1m1_totallines __attribute__((weak));
 
 side_t		doomng_e1m1_sides_storage[DNG_E1M1_NUMSIDES];
 sector_t	doomng_e1m1_sectors_storage[DNG_E1M1_NUMSECTORS];
-sector_static_t	doomng_e1m1_sector_statics_storage[DNG_E1M1_NUMSECTORS];
 line_mut_t	doomng_e1m1_lines_mut_storage[DNG_E1M1_NUMLINES];
 #endif /* DNG_EMBED_GEOMETRY */
 
@@ -346,13 +349,12 @@ void P_LoadSectors (int lump)
     numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
 #if defined(DNG_EMBED_GEOMETRY)
     sectors = doomng_e1m1_sectors_storage;
-    sector_statics = doomng_e1m1_sector_statics_storage;
 #else
     sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);
     sector_statics = Z_Malloc (numsectors*sizeof(sector_static_t),PU_LEVEL,0);
+    memset (sector_statics, 0, numsectors*sizeof(sector_static_t));
 #endif
     memset (sectors, 0, numsectors*sizeof(sector_t));
-    memset (sector_statics, 0, numsectors*sizeof(sector_static_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     ms = (mapsector_t *)data;
@@ -365,8 +367,12 @@ void P_LoadSectors (int lump)
 	ss->ceilingpic = R_FlatNumForName(ms->ceilingpic);
 	ss->lightlevel = SHORT(ms->lightlevel);
 	ss->special = SHORT(ms->special);
+#if defined(DNG_EMBED_GEOMETRY)
+	ss->st = &doomng_embedded_e1m1_sector_statics[i];
+#else
+	sector_statics[i].tag = SHORT(ms->tag);
 	ss->st = &sector_statics[i];
-	ss->st->tag = SHORT(ms->tag);
+#endif
 	ss->thinglist = NULL;
     }
 	
@@ -688,7 +694,11 @@ void P_LoadBlockMap (int lump)
 //
 void P_GroupLines (void)
 {
+#if defined(DNG_EMBED_GEOMETRY)
+    totallines = (int) doomng_embedded_e1m1_totallines;
+#else
     unsigned short*	linebuffer;
+    unsigned short*	linestart;
     int			i;
     int			j;
     line_t*		li;
@@ -697,18 +707,15 @@ void P_GroupLines (void)
     seg_t*		seg;
     fixed_t		bbox[4];
     int			block;
+    sector_static_t*	st;
 	
     // look up sector number for each subsector
-#if defined(DNG_EMBED_GEOMETRY)
-    (void)ss; (void)seg;
-#else
     ss = subsectors;
     for (i=0 ; i<numsubsectors ; i++, ss++)
     {
 	seg = &segs[ss->firstline];
 	ss->sector = SIDE_SECTOR(seg->sidedef);
     }
-#endif
 
     // count number of lines in each sector
     li = lines;
@@ -716,28 +723,29 @@ void P_GroupLines (void)
     for (i=0 ; i<numlines ; i++, li++)
     {
 	totallines++;
-	li->frontsector->st->linecount++;
+	sector_statics[li->frontsector - sectors].linecount++;
 
 	if (li->backsector && li->backsector != li->frontsector)
 	{
-	    li->backsector->st->linecount++;
+	    sector_statics[li->backsector - sectors].linecount++;
 	    totallines++;
 	}
     }
 
     linebuffer = Z_Malloc (totallines*sizeof(unsigned short), PU_LEVEL, 0);
+    linestart = linebuffer;
 
     for (i=0; i<numsectors; ++i)
     {
         // Assign the line buffer for this sector
 
-        sectors[i].st->lines = linebuffer;
-        linebuffer += sectors[i].st->linecount;
+        sector_statics[i].lines = linebuffer;
+        linebuffer += sector_statics[i].linecount;
 
         // Reset linecount to zero so in the next stage we can count
         // lines into the list.
 
-        sectors[i].st->linecount = 0;
+        sector_statics[i].linecount = 0;
     }
 
     // Assign lines to sectors
@@ -750,16 +758,18 @@ void P_GroupLines (void)
         {
             sector = li->frontsector;
 
-            sector->st->lines[sector->st->linecount] = (unsigned short)(li - lines);
-            ++sector->st->linecount;
+            st = &sector_statics[sector - sectors];
+            linestart[(st->lines - linestart) + st->linecount] = (unsigned short)(li - lines);
+            ++st->linecount;
         }
 
         if (li->backsector != NULL && li->frontsector != li->backsector)
         {
             sector = li->backsector;
 
-            sector->st->lines[sector->st->linecount] = (unsigned short)(li - lines);
-            ++sector->st->linecount;
+            st = &sector_statics[sector - sectors];
+            linestart[(st->lines - linestart) + st->linecount] = (unsigned short)(li - lines);
+            ++st->linecount;
         }
     }
     
@@ -779,27 +789,27 @@ void P_GroupLines (void)
 	}
 
 	// set the degenmobj_t to the middle of the bounding box
-	sector->st->soundorg.x = (bbox[BOXRIGHT]+bbox[BOXLEFT])/2;
-	sector->st->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
+	sector_statics[i].soundorg.x = (bbox[BOXRIGHT]+bbox[BOXLEFT])/2;
+	sector_statics[i].soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
 		
 	// adjust bounding box to map blocks
 	block = (bbox[BOXTOP]-bmaporgy+MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block >= bmapheight ? bmapheight-1 : block;
-	sector->st->blockbox[BOXTOP]=block;
+	sector_statics[i].blockbox[BOXTOP]=block;
 
 	block = (bbox[BOXBOTTOM]-bmaporgy-MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block < 0 ? 0 : block;
-	sector->st->blockbox[BOXBOTTOM]=block;
+	sector_statics[i].blockbox[BOXBOTTOM]=block;
 
 	block = (bbox[BOXRIGHT]-bmaporgx+MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block >= bmapwidth ? bmapwidth-1 : block;
-	sector->st->blockbox[BOXRIGHT]=block;
+	sector_statics[i].blockbox[BOXRIGHT]=block;
 
 	block = (bbox[BOXLEFT]-bmaporgx-MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block < 0 ? 0 : block;
-	sector->st->blockbox[BOXLEFT]=block;
+	sector_statics[i].blockbox[BOXLEFT]=block;
     }
-	
+	#endif
 }
 
 // Pad the REJECT lump with extra data when the lump is too small,

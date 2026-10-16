@@ -1555,7 +1555,11 @@ void P_UnArchiveWorld (void)
 	sec->ceilingpic = saveg_read16();
 	sec->lightlevel = saveg_read16();
 	sec->special = saveg_read16();		// needed?
-	sec->st->tag = saveg_read16();		// needed?
+#if defined(DNG_EMBED_GEOMETRY)
+	(void) saveg_read16();
+#else
+	((sector_static_t *) sec->st)->tag = saveg_read16();		// needed?
+#endif
 	sec->specialdata = 0;
 	sec->soundtarget = 0;
     }

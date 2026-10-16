@@ -102,7 +102,7 @@ typedef struct sector_static_s
     short	blockbox[4];
     degenmobj_t	soundorg;
     int		linecount;
-    unsigned short*	lines;
+    const unsigned short*	lines;
 } sector_static_t;
 
 typedef	struct
@@ -139,7 +139,7 @@ typedef	struct
     void*	specialdata;
 
 
-    struct sector_static_s*	st;
+    const struct sector_static_s*	st;
 } sector_t;
 
 #define SECTOR_LINE(sec, i)	(&lines[(sec)->st->lines[i]])

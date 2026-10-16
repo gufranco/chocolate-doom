@@ -67,7 +67,7 @@ typedef struct
     sfxinfo_t *sfxinfo;
 
     // origin of sound
-    mobj_t *origin;
+    const mobj_t *origin;
 
     // handle of the sound being played
     int handle;
@@ -263,7 +263,7 @@ void S_Start(void)
     S_ChangeMusic(mnum, true);
 }
 
-void S_StopSound(mobj_t *origin)
+void S_StopSound(const mobj_t *origin)
 {
     int cnum;
 
@@ -282,7 +282,7 @@ void S_StopSound(mobj_t *origin)
 //   If none available, return -1.  Otherwise channel #.
 //
 
-static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
+static int S_GetChannel(const mobj_t *origin, sfxinfo_t *sfxinfo)
 {
     // channel number to use
     int                cnum;
@@ -343,7 +343,7 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
 // Otherwise, modifies parameters and returns 1.
 //
 
-static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
+static int S_AdjustSoundParams(const mobj_t *listener, const mobj_t *source,
                                int *vol, int *sep)
 {
     fixed_t        approx_dist;
@@ -426,17 +426,17 @@ static int Clamp(int x)
     return x;
 }
 
-void S_StartSound(void *origin_p, int sfx_id)
+void S_StartSound(const void *origin_p, int sfx_id)
 {
     sfxinfo_t *sfx;
-    mobj_t *origin;
+    const mobj_t *origin;
     int rc;
     int sep;
     int pitch;
     int cnum;
     int volume;
 
-    origin = (mobj_t *) origin_p;
+    origin = (const mobj_t *) origin_p;
     volume = snd_SfxVolume;
 
     // check for bogus sound #
