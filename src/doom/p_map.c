@@ -1374,8 +1374,8 @@ P_ChangeSector
     crushchange = crunch;
 	
     // re-check heights for all things near the moving sector
-    for (x=sector->blockbox[BOXLEFT] ; x<= sector->blockbox[BOXRIGHT] ; x++)
-	for (y=sector->blockbox[BOXBOTTOM];y<= sector->blockbox[BOXTOP] ; y++)
+    for (x=sector->st->blockbox[BOXLEFT] ; x<= sector->st->blockbox[BOXRIGHT] ; x++)
+	for (y=sector->st->blockbox[BOXBOTTOM];y<= sector->st->blockbox[BOXTOP] ; y++)
 	    P_BlockThingsIterator (x, y, PIT_ChangeSector);
 	
 	

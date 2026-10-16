@@ -68,7 +68,7 @@ EV_Teleport
     tag = line->tag;
     for (i = 0; i < numsectors; i++)
     {
-	if (sectors[ i ].tag == tag )
+	if (sectors[ i ].st->tag == tag )
 	{
 	    for (thinker = thinkercap.next;
 		 thinker != &thinkercap;

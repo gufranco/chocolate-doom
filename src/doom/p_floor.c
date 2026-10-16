@@ -211,7 +211,7 @@ void T_MoveFloor(floormove_t* floor)
 		      floor->crush,0,floor->direction);
     
     if (!(leveltime&7))
-	S_StartSound(&floor->sector->soundorg, sfx_stnmov);
+	S_StartSound(&floor->sector->st->soundorg, sfx_stnmov);
     
     if (res == pastdest)
     {
@@ -241,7 +241,7 @@ void T_MoveFloor(floormove_t* floor)
 	}
 	P_RemoveThinker(&floor->thinker);
 
-	S_StartSound(&floor->sector->soundorg, sfx_pstop);
+	S_StartSound(&floor->sector->st->soundorg, sfx_pstop);
     }
 
 }
@@ -372,7 +372,7 @@ EV_DoFloor
 	      floor->direction = 1;
 	      floor->sector = sec;
 	      floor->speed = FLOORSPEED;
-	      for (i = 0; i < sec->linecount; i++)
+	      for (i = 0; i < sec->st->linecount; i++)
 	      {
 		  if (twoSided (secnum, i) )
 		  {
@@ -403,7 +403,7 @@ EV_DoFloor
 		P_FindLowestFloorSurrounding(sec);
 	    floor->texture = sec->floorpic;
 
-	    for (i = 0; i < sec->linecount; i++)
+	    for (i = 0; i < sec->st->linecount; i++)
 	    {
 		if ( twoSided(secnum, i) )
 		{
@@ -512,7 +512,7 @@ EV_BuildStairs
 	do
 	{
 	    ok = 0;
-	    for (i = 0;i < sec->linecount;i++)
+	    for (i = 0;i < sec->st->linecount;i++)
 	    {
 		if ( !(SECTOR_LINE(sec, i)->mut->flags & ML_TWOSIDED) )
 		    continue;

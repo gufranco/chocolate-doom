@@ -90,6 +90,7 @@ static boolean DoomNG_HasEmbeddedE1M1Nodes(void)
 int		numlines;
 line_t*		lines;
 line_mut_t*	lines_mut;
+sector_static_t*	sector_statics;
 
 int		numsides;
 side_t*		sides;
@@ -110,6 +111,7 @@ extern const subsector_t doomng_embedded_e1m1_subsectors[] __attribute__((weak))
 
 side_t		doomng_e1m1_sides_storage[DNG_E1M1_NUMSIDES];
 sector_t	doomng_e1m1_sectors_storage[DNG_E1M1_NUMSECTORS];
+sector_static_t	doomng_e1m1_sector_statics_storage[DNG_E1M1_NUMSECTORS];
 line_mut_t	doomng_e1m1_lines_mut_storage[DNG_E1M1_NUMLINES];
 #endif /* DNG_EMBED_GEOMETRY */
 
@@ -344,10 +346,13 @@ void P_LoadSectors (int lump)
     numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
 #if defined(DNG_EMBED_GEOMETRY)
     sectors = doomng_e1m1_sectors_storage;
+    sector_statics = doomng_e1m1_sector_statics_storage;
 #else
     sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);
+    sector_statics = Z_Malloc (numsectors*sizeof(sector_static_t),PU_LEVEL,0);
 #endif
     memset (sectors, 0, numsectors*sizeof(sector_t));
+    memset (sector_statics, 0, numsectors*sizeof(sector_static_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     ms = (mapsector_t *)data;
@@ -360,7 +365,8 @@ void P_LoadSectors (int lump)
 	ss->ceilingpic = R_FlatNumForName(ms->ceilingpic);
 	ss->lightlevel = SHORT(ms->lightlevel);
 	ss->special = SHORT(ms->special);
-	ss->tag = SHORT(ms->tag);
+	ss->st = &sector_statics[i];
+	ss->st->tag = SHORT(ms->tag);
 	ss->thinglist = NULL;
     }
 	
@@ -710,11 +716,11 @@ void P_GroupLines (void)
     for (i=0 ; i<numlines ; i++, li++)
     {
 	totallines++;
-	li->frontsector->linecount++;
+	li->frontsector->st->linecount++;
 
 	if (li->backsector && li->backsector != li->frontsector)
 	{
-	    li->backsector->linecount++;
+	    li->backsector->st->linecount++;
 	    totallines++;
 	}
     }
@@ -725,13 +731,13 @@ void P_GroupLines (void)
     {
         // Assign the line buffer for this sector
 
-        sectors[i].lines = linebuffer;
-        linebuffer += sectors[i].linecount;
+        sectors[i].st->lines = linebuffer;
+        linebuffer += sectors[i].st->linecount;
 
         // Reset linecount to zero so in the next stage we can count
         // lines into the list.
 
-        sectors[i].linecount = 0;
+        sectors[i].st->linecount = 0;
     }
 
     // Assign lines to sectors
@@ -744,16 +750,16 @@ void P_GroupLines (void)
         {
             sector = li->frontsector;
 
-            sector->lines[sector->linecount] = (unsigned short)(li - lines);
-            ++sector->linecount;
+            sector->st->lines[sector->st->linecount] = (unsigned short)(li - lines);
+            ++sector->st->linecount;
         }
 
         if (li->backsector != NULL && li->frontsector != li->backsector)
         {
             sector = li->backsector;
 
-            sector->lines[sector->linecount] = (unsigned short)(li - lines);
-            ++sector->linecount;
+            sector->st->lines[sector->st->linecount] = (unsigned short)(li - lines);
+            ++sector->st->linecount;
         }
     }
     
@@ -764,7 +770,7 @@ void P_GroupLines (void)
     {
 	M_ClearBox (bbox);
 
-	for (j=0 ; j<sector->linecount; j++)
+	for (j=0 ; j<sector->st->linecount; j++)
 	{
             li = SECTOR_LINE(sector, j);
 
@@ -773,25 +779,25 @@ void P_GroupLines (void)
 	}
 
 	// set the degenmobj_t to the middle of the bounding box
-	sector->soundorg.x = (bbox[BOXRIGHT]+bbox[BOXLEFT])/2;
-	sector->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
+	sector->st->soundorg.x = (bbox[BOXRIGHT]+bbox[BOXLEFT])/2;
+	sector->st->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
 		
 	// adjust bounding box to map blocks
 	block = (bbox[BOXTOP]-bmaporgy+MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block >= bmapheight ? bmapheight-1 : block;
-	sector->blockbox[BOXTOP]=block;
+	sector->st->blockbox[BOXTOP]=block;
 
 	block = (bbox[BOXBOTTOM]-bmaporgy-MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block < 0 ? 0 : block;
-	sector->blockbox[BOXBOTTOM]=block;
+	sector->st->blockbox[BOXBOTTOM]=block;
 
 	block = (bbox[BOXRIGHT]-bmaporgx+MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block >= bmapwidth ? bmapwidth-1 : block;
-	sector->blockbox[BOXRIGHT]=block;
+	sector->st->blockbox[BOXRIGHT]=block;
 
 	block = (bbox[BOXLEFT]-bmaporgx-MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block < 0 ? 0 : block;
-	sector->blockbox[BOXLEFT]=block;
+	sector->st->blockbox[BOXLEFT]=block;
     }
 	
 }

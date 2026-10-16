@@ -88,6 +88,7 @@ extern int		numlines;
 extern line_t*		lines;
 
 extern line_mut_t*	lines_mut;
+extern sector_static_t*	sector_statics;
 
 extern int		numsides;
 extern side_t*		sides;

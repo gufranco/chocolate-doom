@@ -271,7 +271,7 @@ fixed_t	P_FindLowestFloorSurrounding(sector_t* sec)
     sector_t*		other;
     fixed_t		floor = sec->floorheight;
 	
-    for (i=0 ;i < sec->linecount ; i++)
+    for (i=0 ;i < sec->st->linecount ; i++)
     {
 	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
@@ -298,7 +298,7 @@ fixed_t	P_FindHighestFloorSurrounding(sector_t *sec)
     sector_t*		other;
     fixed_t		floor = -500*FRACUNIT;
 	
-    for (i=0 ;i < sec->linecount ; i++)
+    for (i=0 ;i < sec->st->linecount ; i++)
     {
 	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
@@ -337,7 +337,7 @@ P_FindNextHighestFloor
     fixed_t     height = currentheight;
     fixed_t     heightlist[MAX_ADJOINING_SECTORS + 2];
 
-    for (i=0, h=0; i < sec->linecount; i++)
+    for (i=0, h=0; i < sec->st->linecount; i++)
     {
         check = SECTOR_LINE(sec, i);
         other = getNextSector(check,sec);
@@ -394,7 +394,7 @@ P_FindLowestCeilingSurrounding(sector_t* sec)
     sector_t*		other;
     fixed_t		height = INT_MAX;
 	
-    for (i=0 ;i < sec->linecount ; i++)
+    for (i=0 ;i < sec->st->linecount ; i++)
     {
 	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
@@ -419,7 +419,7 @@ fixed_t	P_FindHighestCeilingSurrounding(sector_t* sec)
     sector_t*	other;
     fixed_t	height = 0;
 	
-    for (i=0 ;i < sec->linecount ; i++)
+    for (i=0 ;i < sec->st->linecount ; i++)
     {
 	check = SECTOR_LINE(sec, i);
 	other = getNextSector(check,sec);
@@ -446,7 +446,7 @@ P_FindSectorFromLineTag
     int	i;
 	
     for (i=start+1;i<numsectors;i++)
-	if (sectors[i].tag == line->tag)
+	if (sectors[i].st->tag == line->tag)
 	    return i;
     
     return -1;
@@ -469,7 +469,7 @@ P_FindMinSurroundingLight
     sector_t*	check;
 	
     min = max;
-    for (i=0 ; i < sector->linecount ; i++)
+    for (i=0 ; i < sector->st->linecount ; i++)
     {
 	line = SECTOR_LINE(sector, i);
 	check = getNextSector(line,sector);
@@ -1308,7 +1308,7 @@ int EV_DoDonut(line_t*	line)
 	    break;
         }
 
-	for (i = 0; i < s2->linecount; i++)
+	for (i = 0; i < s2->st->linecount; i++)
 	{
 	    s3 = SECTOR_LINE(s2, i)->backsector;
 

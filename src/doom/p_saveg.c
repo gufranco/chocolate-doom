@@ -1507,7 +1507,7 @@ void P_ArchiveWorld (void)
 	saveg_write16(sec->ceilingpic);
 	saveg_write16(sec->lightlevel);
 	saveg_write16(sec->special);		// needed?
-	saveg_write16(sec->tag);		// needed?
+	saveg_write16(sec->st->tag);		// needed?
     }
 
     
@@ -1555,7 +1555,7 @@ void P_UnArchiveWorld (void)
 	sec->ceilingpic = saveg_read16();
 	sec->lightlevel = saveg_read16();
 	sec->special = saveg_read16();		// needed?
-	sec->tag = saveg_read16();		// needed?
+	sec->st->tag = saveg_read16();		// needed?
 	sec->specialdata = 0;
 	sec->soundtarget = 0;
     }

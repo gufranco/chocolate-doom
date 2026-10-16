@@ -115,7 +115,7 @@ P_RecursiveSound
     sec->soundtraversed = soundblocks+1;
     sec->soundtarget = soundtarget;
 	
-    for (i=0 ;i<sec->linecount ; i++)
+    for (i=0 ;i<sec->st->linecount ; i++)
     {
 	check = SECTOR_LINE(sec, i);
 	if (! (check->mut->flags & ML_TWOSIDED) )

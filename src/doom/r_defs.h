@@ -96,6 +96,15 @@ typedef struct
 // The SECTORS record, at runtime.
 // Stores things/mobjs.
 //
+typedef struct sector_static_s
+{
+    short	tag;
+    short	blockbox[4];
+    degenmobj_t	soundorg;
+    int		linecount;
+    unsigned short*	lines;
+} sector_static_t;
+
 typedef	struct
 {
     fixed_t	floorheight;
@@ -109,7 +118,6 @@ typedef	struct
 #endif
     short	lightlevel;
     short	special;
-    short	tag;
 
     // 0 = untraversed, 1,2 = sndlines -1
     short	soundtraversed;
@@ -118,10 +126,8 @@ typedef	struct
     mobj_t*	soundtarget;
 
     // mapblock bounding box for height changes
-    short	blockbox[4];
 
     // origin for any sounds played by the sector
-    degenmobj_t	soundorg;
 
     // if == validcount, already checked
     int		validcount;
@@ -132,12 +138,11 @@ typedef	struct
     // thinker_t for reversable actions
     void*	specialdata;
 
-    int			linecount;
-    unsigned short*	lines;
 
+    struct sector_static_s*	st;
 } sector_t;
 
-#define SECTOR_LINE(sec, i)	(&lines[(sec)->lines[i]])
+#define SECTOR_LINE(sec, i)	(&lines[(sec)->st->lines[i]])
 
 
 
