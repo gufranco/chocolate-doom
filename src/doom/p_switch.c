@@ -196,7 +196,7 @@ P_ChangeSwitchTexture
     int     sound;
 	
     if (!useAgain)
-	line->special = 0;
+	line->mut->special = 0;
 
     texTop = sides[line->sidenum[0]].toptexture;
     texMid = sides[line->sidenum[0]].midtexture;
@@ -205,7 +205,7 @@ P_ChangeSwitchTexture
     sound = sfx_swtchn;
 
     // EXIT SWITCH?
-    if (line->special == 11)                
+    if (line->mut->special == 11)
 	sound = sfx_swtchx;
 	
     for (i = 0;i < numswitches*2;i++)
@@ -270,7 +270,7 @@ P_UseSpecialLine
     // Use the back sides of VERY SPECIAL lines...
     if (side)
     {
-	switch(line->special)
+	switch(line->mut->special)
 	{
 	  case 124:
 	    // Sliding door open&close
@@ -288,10 +288,10 @@ P_UseSpecialLine
     if (!thing->player)
     {
 	// never open secret doors
-	if (line->flags & ML_SECRET)
+	if (line->mut->flags & ML_SECRET)
 	    return false;
 	
-	switch(line->special)
+	switch(line->mut->special)
 	{
 	  case 1: 	// MANUAL DOOR RAISE
 	  case 32:	// MANUAL BLUE
@@ -307,7 +307,7 @@ P_UseSpecialLine
 
     
     // do something  
-    switch (line->special)
+    switch (line->mut->special)
     {
 	// MANUALS
       case 1:		// Vertical Door
