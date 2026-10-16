@@ -20,6 +20,7 @@
 
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "z_zone.h"
@@ -52,6 +53,11 @@ void	P_SpawnMapThing (mapthing_t*	mthing);
 int		numvertexes;
 vertex_t*	vertexes;
 
+extern const uint32_t doomng_embedded_e1m1_numvertexes
+    __attribute__((weak));
+extern const vertex_t  doomng_embedded_e1m1_vertexes[]
+    __attribute__((weak));
+
 int		numsegs;
 seg_t*		segs;
 
@@ -64,11 +70,48 @@ subsector_t*	subsectors;
 int		numnodes;
 node_t*		nodes;
 
+extern const uint32_t doomng_embedded_e1m1_numnodes
+    __attribute__((weak));
+extern const node_t   doomng_embedded_e1m1_nodes[]
+    __attribute__((weak));
+
+static boolean DoomNG_HasEmbeddedE1M1Vertexes(void)
+{
+    return (&doomng_embedded_e1m1_numvertexes != NULL)
+        && (doomng_embedded_e1m1_numvertexes > 0u);
+}
+
+static boolean DoomNG_HasEmbeddedE1M1Nodes(void)
+{
+    return (&doomng_embedded_e1m1_numnodes != NULL)
+        && (doomng_embedded_e1m1_numnodes > 0u);
+}
+
 int		numlines;
 line_t*		lines;
+line_mut_t*	lines_mut;
 
 int		numsides;
 side_t*		sides;
+
+#if defined(DNG_EMBED_GEOMETRY)
+#define DNG_E1M1_NUMLINES	486
+#define DNG_E1M1_NUMSIDES	666
+#define DNG_E1M1_NUMSECTORS	88
+
+extern const uint32_t doomng_embedded_e1m1_numlines __attribute__((weak));
+extern const line_t   doomng_embedded_e1m1_lines[] __attribute__((weak));
+extern const line_mut_t doomng_embedded_e1m1_lines_mut_init[] __attribute__((weak));
+extern const uint32_t doomng_embedded_e1m1_numsegs __attribute__((weak));
+extern const seg_t    doomng_embedded_e1m1_segs[] __attribute__((weak));
+extern const int16_t  doomng_embedded_e1m1_blockmap[] __attribute__((weak));
+extern const uint32_t   doomng_embedded_e1m1_numsubsectors __attribute__((weak));
+extern const subsector_t doomng_embedded_e1m1_subsectors[] __attribute__((weak));
+
+side_t		doomng_e1m1_sides_storage[DNG_E1M1_NUMSIDES];
+sector_t	doomng_e1m1_sectors_storage[DNG_E1M1_NUMSECTORS];
+line_mut_t	doomng_e1m1_lines_mut_storage[DNG_E1M1_NUMLINES];
+#endif /* DNG_EMBED_GEOMETRY */
 
 static int      totallines;
 
@@ -124,12 +167,19 @@ void P_LoadVertexes (int lump)
     mapvertex_t*	ml;
     vertex_t*		li;
 
+    if (DoomNG_HasEmbeddedE1M1Vertexes())
+    {
+        numvertexes = (int)doomng_embedded_e1m1_numvertexes;
+        vertexes = (vertex_t *)(uintptr_t)doomng_embedded_e1m1_vertexes;
+        return;
+    }
+
     // Determine number of lumps:
     //  total lump length / vertex record length.
     numvertexes = W_LumpLength (lump) / sizeof(mapvertex_t);
 
     // Allocate zone memory for buffer.
-    vertexes = Z_Malloc (numvertexes*sizeof(vertex_t),PU_LEVEL,0);	
+    vertexes = Z_Malloc (numvertexes*sizeof(vertex_t),PU_LEVEL,0);
 
     // Load data into cache.
     data = W_CacheLumpNum (lump, PU_STATIC);
@@ -181,9 +231,15 @@ void P_LoadSegs (int lump)
     int			linedef;
     int			side;
     int                 sidenum;
-	
+
+#if defined(DNG_EMBED_GEOMETRY)
+    numsegs = (int)doomng_embedded_e1m1_numsegs;
+    segs = (seg_t *)(uintptr_t)doomng_embedded_e1m1_segs;
+    return;
+#endif
+
     numsegs = W_LumpLength (lump) / sizeof(mapseg_t);
-    segs = Z_Malloc (numsegs*sizeof(seg_t),PU_LEVEL,0);	
+    segs = Z_Malloc (numsegs*sizeof(seg_t),PU_LEVEL,0);
     memset (segs, 0, numsegs*sizeof(seg_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
@@ -209,9 +265,9 @@ void P_LoadSegs (int lump)
         }
 
 	li->sidedef = &sides[ldef->sidenum[side]];
-	li->frontsector = sides[ldef->sidenum[side]].sector;
+	li->frontsector = SIDE_SECTOR(&sides[ldef->sidenum[side]]);
 
-        if (ldef-> flags & ML_TWOSIDED)
+        if (ldef->mut->flags & ML_TWOSIDED)
         {
             sidenum = ldef->sidenum[side ^ 1];
 
@@ -227,7 +283,7 @@ void P_LoadSegs (int lump)
             }
             else
             {
-                li->backsector = sides[sidenum].sector;
+                li->backsector = SIDE_SECTOR(&sides[sidenum]);
             }
         }
         else
@@ -251,20 +307,26 @@ void P_LoadSubsectors (int lump)
     subsector_t*	ss;
 	
     numsubsectors = W_LumpLength (lump) / sizeof(mapsubsector_t);
-    subsectors = Z_Malloc (numsubsectors*sizeof(subsector_t),PU_LEVEL,0);	
+#if defined(DNG_EMBED_GEOMETRY)
+    (void)data; (void)ms; (void)ss; (void)i;
+    subsectors = (subsector_t *)doomng_embedded_e1m1_subsectors;
+    return;
+#else
+    subsectors = Z_Malloc (numsubsectors*sizeof(subsector_t),PU_LEVEL,0);
     data = W_CacheLumpNum (lump,PU_STATIC);
-	
+
     ms = (mapsubsector_t *)data;
     memset (subsectors,0, numsubsectors*sizeof(subsector_t));
     ss = subsectors;
-    
+
     for (i=0 ; i<numsubsectors ; i++, ss++, ms++)
     {
 	ss->numlines = SHORT(ms->numsegs);
 	ss->firstline = SHORT(ms->firstseg);
     }
-	
+
     W_ReleaseLumpNum(lump);
+#endif
 }
 
 
@@ -280,7 +342,11 @@ void P_LoadSectors (int lump)
     sector_t*		ss;
 	
     numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
-    sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);	
+#if defined(DNG_EMBED_GEOMETRY)
+    sectors = doomng_e1m1_sectors_storage;
+#else
+    sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);
+#endif
     memset (sectors, 0, numsectors*sizeof(sector_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
@@ -313,9 +379,16 @@ void P_LoadNodes (int lump)
     int		k;
     mapnode_t*	mn;
     node_t*	no;
-	
+
+    if (DoomNG_HasEmbeddedE1M1Nodes())
+    {
+        numnodes = (int)doomng_embedded_e1m1_numnodes;
+        nodes = (node_t *)(uintptr_t)doomng_embedded_e1m1_nodes;
+        return;
+    }
+
     numnodes = W_LumpLength (lump) / sizeof(mapnode_t);
-    nodes = Z_Malloc (numnodes*sizeof(node_t),PU_LEVEL,0);	
+    nodes = Z_Malloc (numnodes*sizeof(node_t),PU_LEVEL,0);
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
     mn = (mapnode_t *)data;
@@ -342,6 +415,12 @@ void P_LoadNodes (int lump)
 //
 // P_LoadThings
 //
+#if defined(DNG_STREAM_THINGS)
+void DNG_StreamBegin(const byte *data, int numthings);
+void DNG_StreamLoadThing(int index, mapthing_t *thing);
+void DNG_StreamEnd(void);
+#endif
+
 void P_LoadThings (int lump)
 {
     byte               *data;
@@ -354,6 +433,9 @@ void P_LoadThings (int lump)
     data = W_CacheLumpNum (lump,PU_STATIC);
     numthings = W_LumpLength (lump) / sizeof(mapthing_t);
 	
+#if defined(DNG_STREAM_THINGS)
+    DNG_StreamBegin(data, numthings);
+#endif
     mt = (mapthing_t *)data;
     for (i=0 ; i<numthings ; i++, mt++)
     {
@@ -388,8 +470,15 @@ void P_LoadThings (int lump)
 	spawnthing.type = SHORT(mt->type);
 	spawnthing.options = SHORT(mt->options);
 	
+#if defined(DNG_STREAM_THINGS)
+	DNG_StreamLoadThing(i, &spawnthing);
+#else
 	P_SpawnMapThing(&spawnthing);
+#endif
     }
+#if defined(DNG_STREAM_THINGS)
+    DNG_StreamEnd();
+#endif
 
     if (!deathmatch)
     {
@@ -421,16 +510,31 @@ void P_LoadLineDefs (int lump)
     vertex_t*		v2;
 	
     numlines = W_LumpLength (lump) / sizeof(maplinedef_t);
-    lines = Z_Malloc (numlines*sizeof(line_t),PU_LEVEL,0);	
+
+#if defined(DNG_EMBED_GEOMETRY)
+    numlines = (int)doomng_embedded_e1m1_numlines;
+    lines = (line_t *)(uintptr_t)doomng_embedded_e1m1_lines;
+    lines_mut = doomng_e1m1_lines_mut_storage;
+    memcpy(lines_mut, doomng_embedded_e1m1_lines_mut_init,
+           (size_t)numlines * sizeof(line_mut_t));
+    return;
+#endif
+
+    lines = Z_Malloc (numlines*sizeof(line_t),PU_LEVEL,0);
     memset (lines, 0, numlines*sizeof(line_t));
+
+    lines_mut = Z_Malloc (numlines*sizeof(line_mut_t),PU_LEVEL,0);
+    memset (lines_mut, 0, numlines*sizeof(line_mut_t));
+
     data = W_CacheLumpNum (lump,PU_STATIC);
-	
+
     mld = (maplinedef_t *)data;
     ld = lines;
     for (i=0 ; i<numlines ; i++, mld++, ld++)
     {
-	ld->flags = SHORT(mld->flags);
-	ld->special = SHORT(mld->special);
+	ld->mut = &lines_mut[i];
+	ld->mut->flags = SHORT(mld->flags);
+	ld->mut->special = SHORT(mld->special);
 	ld->tag = SHORT(mld->tag);
 	v1 = ld->v1 = &vertexes[SHORT(mld->v1)];
 	v2 = ld->v2 = &vertexes[SHORT(mld->v2)];
@@ -475,12 +579,12 @@ void P_LoadLineDefs (int lump)
 	ld->sidenum[1] = SHORT(mld->sidenum[1]);
 
 	if (ld->sidenum[0] != -1)
-	    ld->frontsector = sides[ld->sidenum[0]].sector;
+	    ld->frontsector = SIDE_SECTOR(&sides[ld->sidenum[0]]);
 	else
 	    ld->frontsector = 0;
 
 	if (ld->sidenum[1] != -1)
-	    ld->backsector = sides[ld->sidenum[1]].sector;
+	    ld->backsector = SIDE_SECTOR(&sides[ld->sidenum[1]]);
 	else
 	    ld->backsector = 0;
     }
@@ -500,7 +604,11 @@ void P_LoadSideDefs (int lump)
     side_t*		sd;
 	
     numsides = W_LumpLength (lump) / sizeof(mapsidedef_t);
-    sides = Z_Malloc (numsides*sizeof(side_t),PU_LEVEL,0);	
+#if defined(DNG_EMBED_GEOMETRY)
+    sides = doomng_e1m1_sides_storage;
+#else
+    sides = Z_Malloc (numsides*sizeof(side_t),PU_LEVEL,0);
+#endif
     memset (sides, 0, numsides*sizeof(side_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
@@ -508,12 +616,14 @@ void P_LoadSideDefs (int lump)
     sd = sides;
     for (i=0 ; i<numsides ; i++, msd++, sd++)
     {
+#if !defined(DNG_EMBED_GEOMETRY)
 	sd->textureoffset = SHORT(msd->textureoffset)<<FRACBITS;
 	sd->rowoffset = SHORT(msd->rowoffset)<<FRACBITS;
+#endif
 	sd->toptexture = R_TextureNumForName(msd->toptexture);
 	sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
 	sd->midtexture = R_TextureNumForName(msd->midtexture);
-	sd->sector = &sectors[SHORT(msd->sector)];
+	sd->sector = (unsigned short)SHORT(msd->sector);
     }
 
     W_ReleaseLumpNum(lump);
@@ -531,18 +641,24 @@ void P_LoadBlockMap (int lump)
 
     lumplen = W_LumpLength(lump);
     count = lumplen / 2;
-	
+
+#if defined(DNG_EMBED_GEOMETRY)
+    blockmaplump = (short *)(uintptr_t)doomng_embedded_e1m1_blockmap;
+    blockmap = blockmaplump + 4;
+    (void)i;
+#else
     blockmaplump = Z_Malloc(lumplen, PU_LEVEL, NULL);
     W_ReadLump(lump, blockmaplump);
     blockmap = blockmaplump + 4;
 
     // Swap all short integers to native byte ordering.
-  
+
     for (i=0; i<count; i++)
     {
 	blockmaplump[i] = SHORT(blockmaplump[i]);
     }
-		
+#endif
+
     // Read the header
 
     bmaporgx = blockmaplump[0]<<FRACBITS;
@@ -566,7 +682,7 @@ void P_LoadBlockMap (int lump)
 //
 void P_GroupLines (void)
 {
-    line_t**		linebuffer;
+    unsigned short*	linebuffer;
     int			i;
     int			j;
     line_t*		li;
@@ -577,12 +693,16 @@ void P_GroupLines (void)
     int			block;
 	
     // look up sector number for each subsector
+#if defined(DNG_EMBED_GEOMETRY)
+    (void)ss; (void)seg;
+#else
     ss = subsectors;
     for (i=0 ; i<numsubsectors ; i++, ss++)
     {
 	seg = &segs[ss->firstline];
-	ss->sector = seg->sidedef->sector;
+	ss->sector = SIDE_SECTOR(seg->sidedef);
     }
+#endif
 
     // count number of lines in each sector
     li = lines;
@@ -599,8 +719,7 @@ void P_GroupLines (void)
 	}
     }
 
-    // build line tables for each sector	
-    linebuffer = Z_Malloc (totallines*sizeof(line_t *), PU_LEVEL, 0);
+    linebuffer = Z_Malloc (totallines*sizeof(unsigned short), PU_LEVEL, 0);
 
     for (i=0; i<numsectors; ++i)
     {
@@ -625,7 +744,7 @@ void P_GroupLines (void)
         {
             sector = li->frontsector;
 
-            sector->lines[sector->linecount] = li;
+            sector->lines[sector->linecount] = (unsigned short)(li - lines);
             ++sector->linecount;
         }
 
@@ -633,7 +752,7 @@ void P_GroupLines (void)
         {
             sector = li->backsector;
 
-            sector->lines[sector->linecount] = li;
+            sector->lines[sector->linecount] = (unsigned short)(li - lines);
             ++sector->linecount;
         }
     }
@@ -647,7 +766,7 @@ void P_GroupLines (void)
 
 	for (j=0 ; j<sector->linecount; j++)
 	{
-            li = sector->lines[j];
+            li = SECTOR_LINE(sector, j);
 
             M_AddToBox (bbox, li->v1->x, li->v1->y);
             M_AddToBox (bbox, li->v2->x, li->v2->y);
@@ -820,8 +939,15 @@ P_SetupLevel
 	lumpname[4] = 0;
     }
 
+#if defined(DNG_FORCE_E1M1)
+    lumpnum = W_CheckNumForName(lumpname);
+    if (lumpnum < 0) {
+        lumpnum = W_GetNumForName("E1M1");
+    }
+#else
     lumpnum = W_GetNumForName (lumpname);
-	
+#endif
+
     maplumpinfo = lumpinfo[lumpnum];
 
     leveltime = 0;
