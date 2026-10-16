@@ -560,7 +560,12 @@ void D_DoAdvanceDemo (void)
       demosequence = (demosequence+1)%7;
     else
       demosequence = (demosequence+1)%6;
-    
+
+    if (demosequence == 1 || demosequence == 3 || demosequence == 5
+        || demosequence == 6) {
+        demosequence = 0;
+    }
+
     switch (demosequence)
     {
       case 0:
