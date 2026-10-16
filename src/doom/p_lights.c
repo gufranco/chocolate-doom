@@ -244,7 +244,7 @@ void EV_TurnTagLightsOff(line_t* line)
 	    min = sector->lightlevel;
 	    for (i = 0;i < sector->linecount; i++)
 	    {
-		templine = sector->lines[i];
+		templine = SECTOR_LINE(sector, i);
 		tsec = getNextSector(templine,sector);
 		if (!tsec)
 		    continue;
@@ -284,7 +284,7 @@ EV_LightTurnOn
 	    {
 		for (j = 0;j < sector->linecount; j++)
 		{
-		    templine = sector->lines[j];
+		    templine = SECTOR_LINE(sector, j);
 		    temp = getNextSector(templine,sector);
 
 		    if (!temp)
