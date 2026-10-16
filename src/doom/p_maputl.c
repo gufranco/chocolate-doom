@@ -490,10 +490,10 @@ P_BlockLinesIterator
     {
 	ld = &lines[*list];
 
-	if (ld->validcount == validcount)
+	if (ld->mut->validcount == validcount)
 	    continue; 	// line has already been checked
 
-	ld->validcount = validcount;
+	ld->mut->validcount = validcount;
 		
 	if ( !func(ld) )
 	    return false;
@@ -599,6 +599,9 @@ PIT_AddLineIntercepts (line_t* ld)
     }
     
 	
+    if (intercept_p - intercepts >= MAXINTERCEPTS) {
+        return false;
+    }
     intercept_p->frac = frac;
     intercept_p->isaline = true;
     intercept_p->d.line = ld;
@@ -665,6 +668,9 @@ boolean PIT_AddThingIntercepts (mobj_t* thing)
     if (frac < 0)
 	return true;		// behind source
 
+    if (intercept_p - intercepts >= MAXINTERCEPTS) {
+        return false;
+    }
     intercept_p->frac = frac;
     intercept_p->isaline = false;
     intercept_p->d.thing = thing;
