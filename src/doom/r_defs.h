@@ -100,20 +100,25 @@ typedef	struct
 {
     fixed_t	floorheight;
     fixed_t	ceilingheight;
+#if defined(DNG_EMBED_GEOMETRY)
+    int8_t	floorpic;
+    int8_t	ceilingpic;
+#else
     short	floorpic;
     short	ceilingpic;
+#endif
     short	lightlevel;
     short	special;
     short	tag;
 
     // 0 = untraversed, 1,2 = sndlines -1
-    int		soundtraversed;
+    short	soundtraversed;
 
     // thing that made a sound (or null)
     mobj_t*	soundtarget;
 
     // mapblock bounding box for height changes
-    int		blockbox[4];
+    short	blockbox[4];
 
     // origin for any sounds played by the sector
     degenmobj_t	soundorg;
@@ -128,9 +133,11 @@ typedef	struct
     void*	specialdata;
 
     int			linecount;
-    struct line_s**	lines;	// [linecount] size
-    
+    unsigned short*	lines;
+
 } sector_t;
+
+#define SECTOR_LINE(sec, i)	(&lines[(sec)->lines[i]])
 
 
 
@@ -141,22 +148,31 @@ typedef	struct
 
 typedef struct
 {
+#if !defined(DNG_EMBED_GEOMETRY)
     // add this to the calculated texture column
     fixed_t	textureoffset;
-    
+
     // add this to the calculated texture top
     fixed_t	rowoffset;
+#endif
 
     // Texture indices.
-    // We do not maintain names here. 
+#if defined(DNG_EMBED_GEOMETRY)
+    int8_t	toptexture;
+    int8_t	bottomtexture;
+    int8_t	midtexture;
+#else
     short	toptexture;
     short	bottomtexture;
     short	midtexture;
+#endif
 
     // Sector the SideDef is facing.
-    sector_t*	sector;
-    
+    unsigned short	sector;
+
 } side_t;
+
+#define SIDE_SECTOR(sd)		(&sectors[(sd)->sector])
 
 
 
@@ -174,6 +190,16 @@ typedef enum
 
 
 
+typedef struct line_mut_s
+{
+    short	flags;
+    short	special;
+
+    int		validcount;
+
+    void*	specialdata;
+} line_mut_t;
+
 typedef struct line_s
 {
     // Vertices, from v1 to v2.
@@ -184,14 +210,11 @@ typedef struct line_s
     fixed_t	dx;
     fixed_t	dy;
 
-    // Animation related.
-    short	flags;
-    short	special;
     short	tag;
 
     // Visual appearance: SideDefs.
     //  sidenum[1] will be -1 if one sided
-    short	sidenum[2];			
+    short	sidenum[2];
 
     // Neat. Another bounding box, for the extent
     //  of the LineDef.
@@ -205,11 +228,7 @@ typedef struct line_s
     sector_t*	frontsector;
     sector_t*	backsector;
 
-    // if == validcount, already checked
-    int		validcount;
-
-    // thinker_t for reversable actions
-    void*	specialdata;		
+    line_mut_t*	mut;
 } line_t;
 
 
