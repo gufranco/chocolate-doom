@@ -199,10 +199,10 @@ boolean P_CrossSubsector (int num)
 	line = seg->linedef;
 
 	// allready checked other side?
-	if (line->validcount == validcount)
+	if (line->mut->validcount == validcount)
 	    continue;
 	
-	line->validcount = validcount;
+	line->mut->validcount = validcount;
 
 	v1 = line->v1;
 	v2 = line->v2;
@@ -234,7 +234,7 @@ boolean P_CrossSubsector (int num)
 
 	// stop because it is not two sided anyway
 	// might do this after updating validcount?
-	if ( !(line->flags & ML_TWOSIDED) )
+	if ( !(line->mut->flags & ML_TWOSIDED) )
 	    return false;
 	
 	// crosses a two sided line
@@ -295,37 +295,30 @@ boolean P_CrossSubsector (int num)
 //
 boolean P_CrossBSPNode (int bspnum)
 {
-    node_t*	bsp;
-    int		side;
-
-    if (bspnum & NF_SUBSECTOR)
+    while (!(bspnum & NF_SUBSECTOR))
     {
-	if (bspnum == -1)
-	    return P_CrossSubsector (0);
+	node_t*	bsp = &nodes[bspnum];
+	int	side;
+
+	side = P_DivlineSide (strace.x, strace.y, (divline_t *)bsp);
+	if (side == 2)
+	    side = 0;	// an "on" should cross both sides
+
+	if (side == P_DivlineSide (t2x, t2y,(divline_t *)bsp))
+	{
+	    bspnum = bsp->children[side];
+	}
 	else
-	    return P_CrossSubsector (bspnum&(~NF_SUBSECTOR));
+	{
+	    if (!P_CrossBSPNode (bsp->children[side]))
+		return false;
+	    bspnum = bsp->children[side^1];
+	}
     }
-		
-    bsp = &nodes[bspnum];
-    
-    // decide which side the start point is on
-    side = P_DivlineSide (strace.x, strace.y, (divline_t *)bsp);
-    if (side == 2)
-	side = 0;	// an "on" should cross both sides
 
-    // cross the starting side
-    if (!P_CrossBSPNode (bsp->children[side]) )
-	return false;
-	
-    // the partition plane is crossed here
-    if (side == P_DivlineSide (t2x, t2y,(divline_t *)bsp))
-    {
-	// the line doesn't touch the other side
-	return true;
-    }
-    
-    // cross the ending side		
-    return P_CrossBSPNode (bsp->children[side^1]);
+    if (bspnum == -1)
+	return P_CrossSubsector (0);
+    return P_CrossSubsector (bspnum&(~NF_SUBSECTOR));
 }
 
 
