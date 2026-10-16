@@ -174,7 +174,7 @@ EV_DoPlat
 	{
 	  case raiseToNearestAndChange:
 	    plat->speed = PLATSPEED/2;
-	    sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
+	    sec->floorpic = SIDE_SECTOR(&sides[line->sidenum[0]])->floorpic;
 	    plat->high = P_FindNextHighestFloor(sec,sec->floorheight);
 	    plat->wait = 0;
 	    plat->status = up;
@@ -186,7 +186,7 @@ EV_DoPlat
 	    
 	  case raiseAndChange:
 	    plat->speed = PLATSPEED/2;
-	    sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
+	    sec->floorpic = SIDE_SECTOR(&sides[line->sidenum[0]])->floorpic;
 	    plat->high = sec->floorheight + amount*FRACUNIT;
 	    plat->wait = 0;
 	    plat->status = up;
@@ -285,7 +285,13 @@ void P_AddActivePlat(plat_t* plat)
 	    activeplats[i] = plat;
 	    return;
 	}
+#if defined(DNG_EMBED_GEOMETRY)
+    plat->sector->specialdata = NULL;
+    P_RemoveThinker(&plat->thinker);
+    return;
+#else
     I_Error ("P_AddActivePlat: no more plats!");
+#endif
 }
 
 void P_RemoveActivePlat(plat_t* plat)
@@ -297,8 +303,12 @@ void P_RemoveActivePlat(plat_t* plat)
 	    (activeplats[i])->sector->specialdata = NULL;
 	    P_RemoveThinker(&(activeplats[i])->thinker);
 	    activeplats[i] = NULL;
-	    
+
 	    return;
 	}
+#if defined(DNG_EMBED_GEOMETRY)
+    return;
+#else
     I_Error ("P_RemoveActivePlat: can't find plat!");
+#endif
 }
