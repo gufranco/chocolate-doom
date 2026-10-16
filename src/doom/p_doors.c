@@ -205,7 +205,7 @@ EV_DoLockedDoor
     if (!p)
 	return 0;
 		
-    switch(line->special)
+    switch(line->mut->special)
     {
       case 99:	// Blue Lock
       case 133:
@@ -343,7 +343,7 @@ EV_VerticalDoor
     //	Check for locks
     player = thing->player;
 		
-    switch(line->special)
+    switch(line->mut->special)
     {
       case 26: // Blue Lock
       case 32:
@@ -393,12 +393,12 @@ EV_VerticalDoor
         I_Error("EV_VerticalDoor: DR special type on 1-sided linedef");
     }
 
-    sec = sides[ line->sidenum[side^1]] .sector;
+    sec = SIDE_SECTOR(&sides[ line->sidenum[side^1] ]);
 
     if (sec->specialdata)
     {
 	door = sec->specialdata;
-	switch(line->special)
+	switch(line->mut->special)
 	{
 	  case	1: // ONLY FOR "RAISE" DOORS, NOT "OPEN"s
 	  case	26:
@@ -452,7 +452,7 @@ EV_VerticalDoor
     }
 	
     // for proper sound
-    switch(line->special)
+    switch(line->mut->special)
     {
       case 117:	// BLAZING DOOR RAISE
       case 118:	// BLAZING DOOR OPEN
@@ -480,7 +480,7 @@ EV_VerticalDoor
     door->speed = VDOORSPEED;
     door->topwait = VDOORWAIT;
 
-    switch(line->special)
+    switch(line->mut->special)
     {
       case 1:
       case 26:
@@ -494,7 +494,7 @@ EV_VerticalDoor
       case 33:
       case 34:
 	door->type = vld_open;
-	line->special = 0;
+	line->mut->special = 0;
 	break;
 	
       case 117:	// blazing door raise
@@ -503,7 +503,7 @@ EV_VerticalDoor
 	break;
       case 118:	// blazing door open
 	door->type = vld_blazeOpen;
-	line->special = 0;
+	line->mut->special = 0;
 	door->speed = VDOORSPEED*4;
 	break;
     }
