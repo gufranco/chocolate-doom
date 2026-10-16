@@ -91,7 +91,7 @@ typedef struct
 //  and end entry, in the order found in
 //  the WAD file.
 //
-animdef_t		animdefs[] =
+const animdef_t	animdefs[] =
 {
     {false,	"NUKAGE3",	"NUKAGE1",	8},
     {false,	"FWATER4",	"FWATER1",	8},
