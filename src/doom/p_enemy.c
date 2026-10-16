@@ -117,8 +117,8 @@ P_RecursiveSound
 	
     for (i=0 ;i<sec->linecount ; i++)
     {
-	check = sec->lines[i];
-	if (! (check->flags & ML_TWOSIDED) )
+	check = SECTOR_LINE(sec, i);
+	if (! (check->mut->flags & ML_TWOSIDED) )
 	    continue;
 	
 	P_LineOpening (check);
@@ -126,12 +126,12 @@ P_RecursiveSound
 	if (openrange <= 0)
 	    continue;	// closed door
 	
-	if ( sides[ check->sidenum[0] ].sector == sec)
-	    other = sides[ check->sidenum[1] ] .sector;
+	if ( SIDE_SECTOR(&sides[ check->sidenum[0] ]) == sec)
+	    other = SIDE_SECTOR(&sides[ check->sidenum[1] ]);
 	else
-	    other = sides[ check->sidenum[0] ].sector;
+	    other = SIDE_SECTOR(&sides[ check->sidenum[0] ]);
 	
-	if (check->flags & ML_SOUNDBLOCK)
+	if (check->mut->flags & ML_SOUNDBLOCK)
 	{
 	    if (!soundblocks)
 		P_RecursiveSound (other, 1);
