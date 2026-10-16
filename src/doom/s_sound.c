@@ -623,6 +623,11 @@ void S_UpdateSounds(mobj_t *listener)
 
 void S_SetMusicVolume(int volume)
 {
+    if (snd_musicdevice == SNDDEVICE_NONE)
+    {
+        return;
+    }
+
     if (volume < 0 || volume > 127)
     {
         I_Error("Attempt to set music volume at %d",
@@ -634,6 +639,11 @@ void S_SetMusicVolume(int volume)
 
 void S_SetSfxVolume(int volume)
 {
+    if (snd_sfxdevice == SNDDEVICE_NONE)
+    {
+        return;
+    }
+
     if (volume < 0 || volume > 127)
     {
         I_Error("Attempt to set sfx volume at %d", volume);
@@ -656,6 +666,11 @@ void S_ChangeMusic(int musicnum, int looping)
     musicinfo_t *music = NULL;
     char namebuf[9];
     void *handle;
+
+    if (snd_musicdevice == SNDDEVICE_NONE)
+    {
+        return;
+    }
 
     // The Doom IWAD file has two versions of the intro music: d_intro
     // and d_introa.  The latter is used for OPL playback.
@@ -688,7 +703,11 @@ void S_ChangeMusic(int musicnum, int looping)
     if (!music->lumpnum)
     {
         M_snprintf(namebuf, sizeof(namebuf), "d_%s", DEH_String(music->name));
-        music->lumpnum = W_GetNumForName(namebuf);
+        music->lumpnum = W_CheckNumForName(namebuf);
+        if (music->lumpnum < 0)
+        {
+            return;
+        }
     }
 
     music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
