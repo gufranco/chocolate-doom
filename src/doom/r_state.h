@@ -87,6 +87,8 @@ extern node_t*		nodes;
 extern int		numlines;
 extern line_t*		lines;
 
+extern line_mut_t*	lines_mut;
+
 extern int		numsides;
 extern side_t*		sides;
 
@@ -105,7 +107,7 @@ extern player_t*	viewplayer;
 // ?
 extern angle_t		clipangle;
 
-extern int		viewangletox[FINEANGLES/2];
+extern int             *viewangletox;
 extern angle_t		xtoviewangle[SCREENWIDTH+1];
 //extern fixed_t		finetangent[FINEANGLES/2];
 
