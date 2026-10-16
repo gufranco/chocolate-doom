@@ -92,9 +92,39 @@ extern line_mut_t*	lines_mut;
 extern int		numsides;
 extern side_t*		sides;
 
+#if defined(DNG_EMBED_GEOMETRY)
+extern const side_t*	sides_rom;
+extern side_t*		side_slots;
+extern const int16_t*	side_slot_of;
+extern const uint16_t*	slot_side;
+
+side_t *P_SideMut(int i);
+
+static inline const side_t *P_SideAt(int i)
+{
+    const int slot = side_slot_of[i];
+    return slot < 0 ? &sides_rom[i] : &side_slots[slot];
+}
+
+static inline int P_SideIndex(const side_t *sd)
+{
+    const uintptr_t at = (uintptr_t) sd;
+    const uintptr_t rom = (uintptr_t) sides_rom;
+    if (at >= rom && at < rom + (uintptr_t) numsides * sizeof(side_t))
+    {
+        return (int) (sd - sides_rom);
+    }
+    return slot_side[sd - side_slots];
+}
+
+#define SIDE_AT(i)	P_SideAt(i)
+#define SIDE_MUT(i)	P_SideMut(i)
+#define SIDE_INDEX(sd)	P_SideIndex(sd)
+#else
 #define SIDE_AT(i)	((const side_t *) &sides[(i)])
 #define SIDE_MUT(i)	(&sides[(i)])
 #define SIDE_INDEX(sd)	((int) ((sd) - sides))
+#endif
 
 
 //

@@ -99,7 +99,6 @@ side_t*		sides;
 
 #if defined(DNG_EMBED_GEOMETRY)
 #define DNG_E1M1_NUMLINES	486
-#define DNG_E1M1_NUMSIDES	666
 #define DNG_E1M1_NUMSECTORS	88
 
 extern const uint32_t doomng_embedded_e1m1_numlines __attribute__((weak));
@@ -112,8 +111,17 @@ extern const uint32_t   doomng_embedded_e1m1_numsubsectors __attribute__((weak))
 extern const subsector_t doomng_embedded_e1m1_subsectors[] __attribute__((weak));
 extern const sector_static_t doomng_embedded_e1m1_sector_statics[] __attribute__((weak));
 extern const uint32_t doomng_embedded_e1m1_totallines __attribute__((weak));
+extern const side_t doomng_embedded_e1m1_sides[] __attribute__((weak));
+extern side_t doomng_e1m1_side_slots[] __attribute__((weak));
+extern const int16_t doomng_embedded_e1m1_side_slot_of[] __attribute__((weak));
+extern const uint16_t doomng_embedded_e1m1_slot_side[] __attribute__((weak));
+extern const uint32_t doomng_embedded_e1m1_numsideslots __attribute__((weak));
 
-side_t		doomng_e1m1_sides_storage[DNG_E1M1_NUMSIDES];
+const side_t*	sides_rom;
+side_t*		side_slots;
+const int16_t*	side_slot_of;
+const uint16_t*	slot_side;
+
 sector_t	doomng_e1m1_sectors_storage[DNG_E1M1_NUMSECTORS];
 line_mut_t	doomng_e1m1_lines_mut_storage[DNG_E1M1_NUMLINES];
 #endif /* DNG_EMBED_GEOMETRY */
@@ -608,6 +616,33 @@ void P_LoadLineDefs (int lump)
 //
 // P_LoadSideDefs
 //
+#if defined(DNG_EMBED_GEOMETRY)
+side_t *P_SideMut(int i)
+{
+    const int slot = side_slot_of[i];
+
+    if (slot < 0)
+    {
+        I_Error("P_SideMut: side %d is in ROM", i);
+    }
+    return &side_slots[slot];
+}
+
+void P_LoadSideDefs (int lump)
+{
+    uint32_t		k;
+
+    numsides = W_LumpLength (lump) / sizeof(mapsidedef_t);
+    sides_rom = doomng_embedded_e1m1_sides;
+    side_slots = doomng_e1m1_side_slots;
+    side_slot_of = doomng_embedded_e1m1_side_slot_of;
+    slot_side = doomng_embedded_e1m1_slot_side;
+    for (k = 0; k < doomng_embedded_e1m1_numsideslots; k++)
+    {
+	side_slots[k] = sides_rom[slot_side[k]];
+    }
+}
+#else
 void P_LoadSideDefs (int lump)
 {
     byte*		data;
@@ -616,11 +651,7 @@ void P_LoadSideDefs (int lump)
     side_t*		sd;
 	
     numsides = W_LumpLength (lump) / sizeof(mapsidedef_t);
-#if defined(DNG_EMBED_GEOMETRY)
-    sides = doomng_e1m1_sides_storage;
-#else
     sides = Z_Malloc (numsides*sizeof(side_t),PU_LEVEL,0);
-#endif
     memset (sides, 0, numsides*sizeof(side_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
@@ -628,10 +659,8 @@ void P_LoadSideDefs (int lump)
     sd = sides;
     for (i=0 ; i<numsides ; i++, msd++, sd++)
     {
-#if !defined(DNG_EMBED_GEOMETRY)
 	sd->textureoffset = SHORT(msd->textureoffset)<<FRACBITS;
 	sd->rowoffset = SHORT(msd->rowoffset)<<FRACBITS;
-#endif
 	sd->toptexture = R_TextureNumForName(msd->toptexture);
 	sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
 	sd->midtexture = R_TextureNumForName(msd->midtexture);
@@ -640,6 +669,7 @@ void P_LoadSideDefs (int lump)
 
     W_ReleaseLumpNum(lump);
 }
+#endif
 
 
 //
