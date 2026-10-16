@@ -196,8 +196,6 @@ typedef struct line_mut_s
     short	special;
 
     int		validcount;
-
-    void*	specialdata;
 } line_mut_t;
 
 typedef struct line_s
