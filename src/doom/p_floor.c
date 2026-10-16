@@ -407,7 +407,7 @@ EV_DoFloor
 	    {
 		if ( twoSided(secnum, i) )
 		{
-		    if (getSide(secnum,i,0)->sector-sectors == secnum)
+		    if (getSide(secnum,i,0)->sector == (unsigned short)secnum)
 		    {
 			sec = getSector(secnum,i,1);
 
@@ -514,16 +514,16 @@ EV_BuildStairs
 	    ok = 0;
 	    for (i = 0;i < sec->linecount;i++)
 	    {
-		if ( !((sec->lines[i])->flags & ML_TWOSIDED) )
+		if ( !(SECTOR_LINE(sec, i)->mut->flags & ML_TWOSIDED) )
 		    continue;
-					
-		tsec = (sec->lines[i])->frontsector;
+
+		tsec = SECTOR_LINE(sec, i)->frontsector;
 		newsecnum = tsec-sectors;
-		
+
 		if (secnum != newsecnum)
 		    continue;
 
-		tsec = (sec->lines[i])->backsector;
+		tsec = SECTOR_LINE(sec, i)->backsector;
 		newsecnum = tsec - sectors;
 
 		if (tsec->floorpic != texture)
