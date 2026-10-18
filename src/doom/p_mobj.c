@@ -870,7 +870,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
             return;
         }
         if (dng_free < DNG_MOBJ_SOFT_RESERVE
-            && !(mobjinfo[i].flags & (MF_COUNTKILL | MF_SPECIAL)))
+            && !(mobjinfo[i].flags & (MF_COUNTKILL | MF_SPECIAL | MF_SOLID)))
         {
             return;
         }
