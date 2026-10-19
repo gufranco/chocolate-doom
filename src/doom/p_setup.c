@@ -52,6 +52,8 @@ void	P_SpawnMapThing (mapthing_t*	mthing);
 // MAP related Lookup tables.
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
+const dng_level_t *doomng_level;
+
 int		numvertexes;
 vertex_t*	vertexes;
 
@@ -69,12 +71,12 @@ node_t*		nodes;
 
 static boolean DoomNG_HasEmbeddedVertexes(void)
 {
-    return (&doomng_level != NULL) && (*doomng_level.numvertexes > 0u);
+    return (doomng_level != NULL) && (*doomng_level->numvertexes > 0u);
 }
 
 static boolean DoomNG_HasEmbeddedNodes(void)
 {
-    return (&doomng_level != NULL) && (*doomng_level.numnodes > 0u);
+    return (doomng_level != NULL) && (*doomng_level->numnodes > 0u);
 }
 
 int		numlines;
@@ -150,8 +152,8 @@ void P_LoadVertexes (int lump)
 
     if (DoomNG_HasEmbeddedVertexes())
     {
-        numvertexes = (int)*doomng_level.numvertexes;
-        vertexes = (vertex_t *)(uintptr_t)doomng_level.vertexes;
+        numvertexes = (int)*doomng_level->numvertexes;
+        vertexes = (vertex_t *)(uintptr_t)doomng_level->vertexes;
         return;
     }
 
@@ -214,8 +216,8 @@ void P_LoadSegs (int lump)
     int                 sidenum;
 
 #if defined(DNG_EMBED_GEOMETRY)
-    numsegs = (int)*doomng_level.numsegs;
-    segs = (seg_t *)(uintptr_t)doomng_level.segs;
+    numsegs = (int)*doomng_level->numsegs;
+    segs = (seg_t *)(uintptr_t)doomng_level->segs;
     return;
 #endif
 
@@ -290,7 +292,7 @@ void P_LoadSubsectors (int lump)
     numsubsectors = W_LumpLength (lump) / sizeof(mapsubsector_t);
 #if defined(DNG_EMBED_GEOMETRY)
     (void)data; (void)ms; (void)ss; (void)i;
-    subsectors = (subsector_t *)doomng_level.subsectors;
+    subsectors = (subsector_t *)doomng_level->subsectors;
     return;
 #else
     subsectors = Z_Malloc (numsubsectors*sizeof(subsector_t),PU_LEVEL,0);
@@ -324,7 +326,7 @@ void P_LoadSectors (int lump)
 	
     numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
 #if defined(DNG_EMBED_GEOMETRY)
-    sectors = doomng_level.sectors_storage;
+    sectors = doomng_level->sectors_storage;
 #else
     sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);
     sector_statics = Z_Malloc (numsectors*sizeof(sector_static_t),PU_LEVEL,0);
@@ -344,7 +346,7 @@ void P_LoadSectors (int lump)
 	ss->lightlevel = SHORT(ms->lightlevel);
 	ss->special = SHORT(ms->special);
 #if defined(DNG_EMBED_GEOMETRY)
-	ss->st = &doomng_level.sector_statics[i];
+	ss->st = &doomng_level->sector_statics[i];
 #else
 	sector_statics[i].tag = SHORT(ms->tag);
 	ss->st = &sector_statics[i];
@@ -370,8 +372,8 @@ void P_LoadNodes (int lump)
 
     if (DoomNG_HasEmbeddedNodes())
     {
-        numnodes = (int)*doomng_level.numnodes;
-        nodes = (node_t *)(uintptr_t)doomng_level.nodes;
+        numnodes = (int)*doomng_level->numnodes;
+        nodes = (node_t *)(uintptr_t)doomng_level->nodes;
         return;
     }
 
@@ -500,10 +502,10 @@ void P_LoadLineDefs (int lump)
     numlines = W_LumpLength (lump) / sizeof(maplinedef_t);
 
 #if defined(DNG_EMBED_GEOMETRY)
-    numlines = (int)*doomng_level.numlines;
-    lines = (line_t *)(uintptr_t)doomng_level.lines;
-    lines_mut = doomng_level.lines_mut_storage;
-    memcpy(lines_mut, doomng_level.lines_mut_init,
+    numlines = (int)*doomng_level->numlines;
+    lines = (line_t *)(uintptr_t)doomng_level->lines;
+    lines_mut = doomng_level->lines_mut_storage;
+    memcpy(lines_mut, doomng_level->lines_mut_init,
            (size_t)numlines * sizeof(line_mut_t));
     return;
 #endif
@@ -601,11 +603,11 @@ void P_LoadSideDefs (int lump)
     uint32_t		k;
 
     numsides = W_LumpLength (lump) / sizeof(mapsidedef_t);
-    sides_rom = doomng_level.sides;
-    side_slots = doomng_level.side_slots;
-    side_slot_of = doomng_level.side_slot_of;
-    slot_side = doomng_level.slot_side;
-    for (k = 0; k < *doomng_level.numsideslots; k++)
+    sides_rom = doomng_level->sides;
+    side_slots = doomng_level->side_slots;
+    side_slot_of = doomng_level->side_slot_of;
+    slot_side = doomng_level->slot_side;
+    for (k = 0; k < *doomng_level->numsideslots; k++)
     {
 	side_slots[k] = sides_rom[slot_side[k]];
     }
@@ -653,7 +655,7 @@ void P_LoadBlockMap (int lump)
     count = lumplen / 2;
 
 #if defined(DNG_EMBED_GEOMETRY)
-    blockmaplump = (short *)(uintptr_t)doomng_level.blockmap;
+    blockmaplump = (short *)(uintptr_t)doomng_level->blockmap;
     blockmap = blockmaplump + 4;
     (void)i;
 #else
@@ -693,7 +695,7 @@ void P_LoadBlockMap (int lump)
 void P_GroupLines (void)
 {
 #if defined(DNG_EMBED_GEOMETRY)
-    totallines = (int) *doomng_level.totallines;
+    totallines = (int) *doomng_level->totallines;
 #else
     unsigned short*	linebuffer;
     unsigned short*	linestart;
@@ -953,10 +955,15 @@ P_SetupLevel
 	lumpname[4] = 0;
     }
 
+    if (DNG_SelectLevel != NULL)
+    {
+        doomng_level = DNG_SelectLevel(lumpname);
+    }
+
 #if defined(DNG_WARP)
     lumpnum = W_CheckNumForName(lumpname);
     if (lumpnum < 0) {
-        lumpnum = W_GetNumForName(doomng_level.lumpname);
+        lumpnum = W_GetNumForName(doomng_level->lumpname);
     }
 #else
     lumpnum = W_GetNumForName (lumpname);

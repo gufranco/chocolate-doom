@@ -10,6 +10,8 @@ typedef struct
     char lumpname[9];
     uint8_t episode;
     uint8_t map;
+    uint8_t bank;
+    const void *render;
     const uint32_t *numvertexes;
     const vertex_t *vertexes;
     const uint32_t *numnodes;
@@ -35,6 +37,8 @@ typedef struct
 #endif
 } dng_level_t;
 
-extern const dng_level_t doomng_level __attribute__((weak));
+extern const dng_level_t *doomng_level;
+
+const dng_level_t *DNG_SelectLevel(const char *lumpname) __attribute__((weak));
 
 #endif
