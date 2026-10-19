@@ -953,7 +953,7 @@ P_SetupLevel
 	lumpname[4] = 0;
     }
 
-#if defined(DNG_FORCE_E1M1)
+#if defined(DNG_WARP)
     lumpnum = W_CheckNumForName(lumpname);
     if (lumpnum < 0) {
         lumpnum = W_GetNumForName(doomng_level.lumpname);
