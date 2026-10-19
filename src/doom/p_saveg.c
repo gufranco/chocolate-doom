@@ -1514,8 +1514,8 @@ void P_ArchiveWorld (void)
     // do lines
     for (i=0, li = lines ; i<numlines ; i++,li++)
     {
-	saveg_write16(li->flags);
-	saveg_write16(li->special);
+	saveg_write16(li->mut->flags);
+	saveg_write16(li->mut->special);
 	saveg_write16(li->tag);
 	for (j=0 ; j<2 ; j++)
 	{
@@ -1567,8 +1567,8 @@ void P_UnArchiveWorld (void)
     // do lines
     for (i=0, li = lines ; i<numlines ; i++,li++)
     {
-	li->flags = saveg_read16();
-	li->special = saveg_read16();
+	li->mut->flags = saveg_read16();
+	li->mut->special = saveg_read16();
 	li->tag = saveg_read16();
 	for (j=0 ; j<2 ; j++)
 	{

@@ -1150,9 +1150,9 @@ void AM_drawWalls(void)
 	l.a.y = lines[i].v1->y;
 	l.b.x = lines[i].v2->x;
 	l.b.y = lines[i].v2->y;
-	if (cheating || (lines[i].flags & ML_MAPPED))
+	if (cheating || (lines[i].mut->flags & ML_MAPPED))
 	{
-	    if ((lines[i].flags & LINE_NEVERSEE) && !cheating)
+	    if ((lines[i].mut->flags & LINE_NEVERSEE) && !cheating)
 		continue;
 	    if (!lines[i].backsector)
 	    {
@@ -1160,11 +1160,11 @@ void AM_drawWalls(void)
 	    }
 	    else
 	    {
-		if (lines[i].special == 39)
+		if (lines[i].mut->special == 39)
 		{ // teleporters
 		    AM_drawMline(&l, WALLCOLORS+WALLRANGE/2);
 		}
-		else if (lines[i].flags & ML_SECRET) // secret door
+		else if (lines[i].mut->flags & ML_SECRET) // secret door
 		{
 		    if (cheating) AM_drawMline(&l, SECRETWALLCOLORS + lightlev);
 		    else AM_drawMline(&l, WALLCOLORS+lightlev);
@@ -1184,7 +1184,7 @@ void AM_drawWalls(void)
 	}
 	else if (plr->powers[pw_allmap])
 	{
-	    if (!(lines[i].flags & LINE_NEVERSEE)) AM_drawMline(&l, GRAYS+3);
+	    if (!(lines[i].mut->flags & LINE_NEVERSEE)) AM_drawMline(&l, GRAYS+3);
 	}
     }
 }
