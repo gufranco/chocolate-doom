@@ -862,7 +862,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     }
 #endif
 
-#if defined(DNG_MOBJ_BUDGET)
+#if defined(DNG_MOBJ_BUDGET) && !defined(DNG_STREAM_THINGS)
     {
         const int dng_free = Z_FreeMemory();
         if (dng_free < DNG_MOBJ_HARD_RESERVE)
